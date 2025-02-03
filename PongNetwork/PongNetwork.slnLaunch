@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "RunBoth",
+    "Projects": [
+      {
+        "Path": "PongNetworkServer\\PongNetworkServer.vcxproj",
+        "Action": "Start",
+        "DebugTarget": "Débogueur Windows local"
+      },
+      {
+        "Path": "PongNetworkClient\\PongNetworkClient.vcxproj",
+        "Action": "Start",
+        "DebugTarget": "Débogueur Windows local"
+      }
+    ]
+  }
+]

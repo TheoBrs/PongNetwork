@@ -3,6 +3,8 @@
 #include <ws2tcpip.h>
 #include <SFML/Graphics.hpp>
 
+#include "App.h"
+
 #pragma comment(lib, "ws2_32.lib") // Lien avec la bibliothèque Winsock
 
 #define SERVER_IP "127.0.0.1"
@@ -70,21 +72,6 @@ int ConnectToServer()
 int main()
 {
     ConnectToServer();
-
-    sf::RenderWindow window(sf::VideoMode({ 200, 200 }), "SFML works!");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
-
-    while (window.isOpen())
-    {
-        while (const std::optional event = window.pollEvent())
-        {
-            if (event->is<sf::Event::Closed>())
-                window.close();
-        }
-
-        window.clear();
-        window.draw(shape);
-        window.display();
-    }
+    App app = App();
+    app.Run();
 }
