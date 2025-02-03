@@ -1,3 +1,4 @@
+#include <iostream>
 #include "App.h"
 
 void App::Run()
@@ -16,6 +17,13 @@ void App::Init()
 	m_window = new sf::RenderWindow(sf::VideoMode({ 1920, 1080 }), "SFML works!");
 	m_baseShape = new sf::CircleShape(100.f);
 	m_baseShape->setFillColor(sf::Color::Green);
+
+	auto bind = std::bind(&App::TestCallback, this);
+	auto bind2 = std::bind(&App::Test2Callback, this);
+
+	m_callback += bind;
+	m_callback += bind2;
+	m_callback();
 }
 
 void App::Update()
@@ -37,4 +45,14 @@ void App::HandleEvents()
 			m_window->close();
 	}
 
+}
+
+void App::TestCallback()
+{
+	std::cout<< "Callback 1" <<std::endl;
+}
+
+void App::Test2Callback()
+{
+	std::cout<< "Callback 2" <<std::endl;
 }
