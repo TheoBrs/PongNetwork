@@ -2,6 +2,7 @@
 #include <winsock2.h>
 #include <unordered_map>
 #include <string>
+#include <SFML/System/Vector2.hpp>
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -11,7 +12,7 @@
 struct Player 
 {
     sockaddr_in addr;
-    float paddleY;
+    sf::Vector2f playerPosition;
 };
 
 std::unordered_map<int, Player> players;
@@ -69,39 +70,46 @@ int main()
         {
             buffer[bytesReceived] = '\0';
 
-            int playerID;
-            float paddleY;
-            sscanf_s(buffer, "%d %f", &playerID, &paddleY);
+            int playerID = -1;
+            float paddleX = -1;
+            float paddleY = -1;
+
+            sscanf_s(buffer, "%d %f", &playerID, &paddleX);
 
             // Add player if he's not already connected, or update its position
             if (playerID == 0) 
             {
                 playerID = players.size() + 1;
-                players[playerID] = { clientAddr, paddleY };
+                
                 std::cout << "Joueur " << playerID << " connecte !" << std::endl;
 
                 if (playerID == 1)
                 {
-                    paddleY = 200;
+                    paddleX = 100;
+                    paddleY = 350;
                 }
                 else if (playerID == 2)
                 {
-                    paddleY = 600;
+                    paddleX = 700;
+                    paddleY = 350;
                 }
 
+                players[playerID] = { clientAddr, sf::Vector2f(paddleX, paddleY)};
+
                 // Send the player its ID and position
-                std::string message = std::to_string(playerID) + " " + std::to_string(paddleY);
+                std::string message = std::to_string(playerID) + " " + std::to_string(paddleX) + " " + std::to_string(paddleY);
                 sendto(serverSocket, message.c_str(), message.size(), 0, (sockaddr*)&players[playerID].addr, sizeof(players[playerID].addr));
             }
             else 
             {
-                players[playerID].paddleY = paddleY;
+                players[playerID].playerPosition.x = paddleX;
+                players[playerID].playerPosition.y = paddleY;
             }
 
             // Send updates to every players
             for (auto& [id, player] : players) 
             {
-                std::string message = std::to_string(playerID) + " " + std::to_string(paddleY) + " " +
+                std::string message = std::to_string(playerID) + " " + std::to_string(paddleX) + " " +
                     std::to_string(ballX) + " " + std::to_string(ballY);
 
                 sendto(serverSocket, message.c_str(), message.size(), 0, (sockaddr*)&player.addr, sizeof(player.addr));
