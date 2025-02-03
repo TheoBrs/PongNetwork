@@ -1,20 +1,84 @@
-// PongNetworkServer.cpp : Ce fichier contient la fonction 'main'. L'exécution du programme commence et se termine à cet endroit.
-//
-
 #include <iostream>
+#include <winsock2.h>
+
+#pragma comment(lib, "ws2_32.lib") // Lien avec la bibliothèque Winsock
+
+#define PORT 54000
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    WSADATA wsaData;
+    SOCKET serverSocket, clientSocket;
+    sockaddr_in serverAddr, clientAddr;
+    int addrLen = sizeof(clientAddr);
+
+    // 1. Initialiser Winsock
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        std::cerr << "Erreur Winsock !" << std::endl;
+        return 1;
+    }
+
+    // 2. Créer un socket
+    serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (serverSocket == INVALID_SOCKET) {
+        std::cerr << "Erreur socket !" << std::endl;
+        WSACleanup();
+        return 1;
+    }
+
+    // 3. Configurer l'adresse et le port
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_addr.s_addr = INADDR_ANY;
+    serverAddr.sin_port = htons(PORT);
+
+    // 4. Associer le socket à l'adresse et au port
+    if (bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+        std::cerr << "Erreur bind !" << std::endl;
+        closesocket(serverSocket);
+        WSACleanup();
+        return 1;
+    }
+
+    // 5. Passer en mode écoute
+    if (listen(serverSocket, SOMAXCONN) == SOCKET_ERROR) {
+        std::cerr << "Erreur listen !" << std::endl;
+        closesocket(serverSocket);
+        WSACleanup();
+        return 1;
+    }
+
+    std::cout << "Serveur en attente sur le port " << PORT << "..." << std::endl;
+
+    // 6. Accepter une connexion client
+    clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &addrLen);
+    if (clientSocket == INVALID_SOCKET) {
+        std::cerr << "Erreur accept !" << std::endl;
+        closesocket(serverSocket);
+        WSACleanup();
+        return 1;
+    }
+
+    std::cout << "Client connecte !" << std::endl;
+
+    // 7. Envoyer un message au client
+    const char* welcomeMsg = "Bienvenue sur le serveur !";
+    send(clientSocket, welcomeMsg, strlen(welcomeMsg), 0);
+
+    // 8. Recevoir un message du client
+    char buffer[512];
+    int bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
+    if (bytesReceived > 0) {
+        buffer[bytesReceived] = '\0';
+        std::cout << "Message recu du client : " << buffer << std::endl;
+    }
+
+    // 9. Fermer les sockets
+    closesocket(clientSocket);
+    closesocket(serverSocket);
+    WSACleanup();
+
+    while (true)
+    {
+
+    }
 }
-
-// Exécuter le programme : Ctrl+F5 ou menu Déboguer > Exécuter sans débogage
-// Déboguer le programme : F5 ou menu Déboguer > Démarrer le débogage
-
-// Astuces pour bien démarrer : 
-//   1. Utilisez la fenêtre Explorateur de solutions pour ajouter des fichiers et les gérer.
-//   2. Utilisez la fenêtre Team Explorer pour vous connecter au contrôle de code source.
-//   3. Utilisez la fenêtre Sortie pour voir la sortie de la génération et d'autres messages.
-//   4. Utilisez la fenêtre Liste d'erreurs pour voir les erreurs.
-//   5. Accédez à Projet > Ajouter un nouvel élément pour créer des fichiers de code, ou à Projet > Ajouter un élément existant pour ajouter des fichiers de code existants au projet.
-//   6. Pour rouvrir ce projet plus tard, accédez à Fichier > Ouvrir > Projet et sélectionnez le fichier .sln.
