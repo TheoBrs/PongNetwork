@@ -7,22 +7,24 @@
 
 #define SERVER_IP "127.0.0.1"
 #define PORT 54000
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define BUFFER_SIZE 1024
 
 int ConnectToServer()
 {
     WSADATA wsaData;
     SOCKET clientSocket;
     sockaddr_in serverAddr;
+    char buffer[BUFFER_SIZE];
 
     // 1. Initialiser Winsock
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) 
+    {
         std::cerr << "Erreur Winsock !" << std::endl;
         return 1;
     }
 
     // 2. Créer un socket
-    clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+    clientSocket = socket(AF_INET, SOCK_DGRAM, 0);
     if (clientSocket == INVALID_SOCKET) {
         std::cerr << "Erreur socket !" << std::endl;
         WSACleanup();
@@ -31,6 +33,7 @@ int ConnectToServer()
 
     // 3. Configurer l'adresse du serveur
     serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(PORT);
 
     if (inet_pton(AF_INET, SERVER_IP, &serverAddr.sin_addr) <= 0)
     {
@@ -38,36 +41,30 @@ int ConnectToServer()
         return 1;
     }
 
-    serverAddr.sin_port = htons(PORT);
-
-    // 4. Se connecter au serveur
-
+    // 4. Envoyer un message au serveur
     std::cout << "Tentative de connexion au serveur..." << std::endl;
 
-    if (connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
-        std::cerr << "Erreur connexion !" << WSAGetLastError() << std::endl;
-        closesocket(clientSocket);
-        WSACleanup();
+    std::string message = "Hello, server !";
+    if (!sendto(clientSocket, message.c_str(), message.size(), 0, (sockaddr*)&serverAddr, sizeof(serverAddr)))
+    {
+        std::cerr << "Impossible d'envoyer un message au serveur !" << std::endl;
         return 1;
     }
 
-    std::cout << "Connecte au serveur !" << std::endl;
+    std::cout << "Message envoye au serveur." << std::endl;
 
     // 5. Recevoir un message du serveur
-    char buffer[512];
-    int bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
-    if (bytesReceived > 0) {
+    int serverAddrSize = sizeof(serverAddr);
+    int bytesReceived = recvfrom(clientSocket, buffer, BUFFER_SIZE, 0, (sockaddr*)&serverAddr, &serverAddrSize);
+    if (bytesReceived > 0) 
+    {
         buffer[bytesReceived] = '\0';
-        std::cout << "Message recu du serveur : " << buffer << std::endl;
+        std::cout << "Reponse du serveur : " << buffer << std::endl;
     }
 
-    // 6. Envoyer un message au serveur
-    const char* msg = "Hello Serveur !";
-    send(clientSocket, msg, strlen(msg), 0);
-
-    // 7. Fermer le socket
     closesocket(clientSocket);
     WSACleanup();
+    return 0;
 }
 
 int main()
