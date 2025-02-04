@@ -5,12 +5,13 @@
 class UDPService
 {
 private:
-    void InitWinsock();
+    int InitWinsock();
+    int InitSocket();
 protected:
     WSADATA m_wsaData;
+    SOCKET m_socket;
 public:
-    virtual void Init();
+    virtual int Init();
     virtual void SendMessage(std::string message){};
     virtual unsigned long long ReceiveMessage(){};
-    
 };
