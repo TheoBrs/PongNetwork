@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "Ball.h"
+#include "App.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -134,7 +135,12 @@ int main()
     }
 
 #pragma endregion
-
+    
+#pragma region NewSFMLWindow
+    App app = App();
+    app.Run();
+#pragma endregion
+    
 #pragma region Winsock cleanup
 
     closesocket(clientSocket);
