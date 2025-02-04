@@ -142,6 +142,8 @@
     <ClCompile Include="PongNetworkClient.cpp" />
     <ClCompile Include="Paddle.cpp" />
     <ClCompile Include="TextField.cpp" />
+    <ClCompile Include="UDPClient.cpp" />
+    <ClCompile Include="UDPService.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -152,6 +154,8 @@
     <ClInclude Include="EventHandler.h" />
     <ClInclude Include="Paddle.h" />
     <ClInclude Include="TextField.h" />
+    <ClInclude Include="UDPClient.h" />
+    <ClInclude Include="UDPService.h" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="EventCallback.inl" />
