@@ -19,7 +19,7 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="Paddle.cpp">
-    	<Filter>Fichiers sources</Filter>
+      <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="App.cpp">
       <Filter>Fichiers sources</Filter>
@@ -33,14 +33,26 @@
     <ClCompile Include="EventCallback.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="EventHandler.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="TextField.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="UDPClient.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="UDPService.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
     <ClCompile Include="Ball.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-  	<ClInclude Include="Paddle.h">
-  		<Filter>Fichiers d%27en-tête</Filter>
-  	</ClInclude>
+    <ClInclude Include="Paddle.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
     <ClInclude Include="App.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
@@ -51,6 +63,21 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="EventCallback.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="EventCallback.inl">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="EventHandler.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="TextField.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="UDPClient.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="UDPService.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="Ball.h">

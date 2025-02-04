@@ -137,8 +137,8 @@ int main()
 #pragma endregion
     
 #pragma region NewSFMLWindow
-    App app = App();
-    app.Run();
+    //App app = App();
+    //app.Run();
 #pragma endregion
     
 #pragma region Winsock cleanup
