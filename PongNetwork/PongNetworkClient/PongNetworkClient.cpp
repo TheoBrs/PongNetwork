@@ -3,14 +3,22 @@
 #include <ws2tcpip.h>
 #include <SFML/Graphics.hpp>
 
+#include "Paddle.h"
+#include "App.h"
+
 #pragma comment(lib, "ws2_32.lib")
 
 #define SERVER_IP "127.0.0.1"
 #define PORT 54000
 #define BUFFER_SIZE 1024
 
+sf::Vector2f screenSize;
+
 int main()
 {
+    // sf::RenderWindow window(sf::VideoMode({ 800, 800 }), "Ultimate Pong Supreme Battle Royale Deluxe 2");
+    // screenSize = sf::Vector2f(window.getSize());
+
 #pragma region Initialize Winsock, create socket, and setup server adress
 
     WSADATA wsaData;
@@ -62,8 +70,9 @@ int main()
 
 #pragma region Receive message from server and get ID and position from the server
 
-    int playerID;
-    float paddleY;
+    int playerID = 0;
+    float paddleX = 0;
+    float paddleY = 0;
 
     int serverAddrSize = sizeof(serverAddr);
     int bytesReceived = recvfrom(clientSocket, buffer, BUFFER_SIZE, 0, (sockaddr*)&serverAddr, &serverAddrSize);
@@ -72,18 +81,15 @@ int main()
         buffer[bytesReceived] = '\0';
 
         // Getting ID and position
-        sscanf_s(buffer, "%d %f", &playerID, &paddleY);
-        std::cout << "Vous etes le joueur " << playerID << ", votre paddle se situe en position Y = " << paddleY << std::endl;
+        sscanf_s(buffer, "%d %f %f", &playerID, &paddleX, &paddleY);
+        std::cout << "Vous etes le joueur " << playerID << ", votre paddle se situe en position " << paddleX << "," << paddleY <<std::endl;
     }
 
 #pragma endregion
 
+    //Paddle playerPaddle = Paddle(paddleX, paddleY, 20, 80, 500, screenSize);
 #pragma region Manage gameplay and graphics with SFML and send and receive data from server to keep being updated
-
-    sf::RenderWindow window(sf::VideoMode({ 800, 800 }), "Ultimate Pong Supreme Battle Royale Deluxe 2");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
-
+/*
     while (window.isOpen())
     {
         while (const std::optional event = window.pollEvent())
@@ -92,21 +98,37 @@ int main()
                 window.close();
         }
 
-        // Send its position to the server to keep it updated
-        std::string message = std::to_string(playerID) + " " + std::to_string(paddleY);
+        // Send its ID and position to the server to keep it updated
+        std::string message = std::to_string(playerID) + " " + 
+            std::to_string(playerPaddle.GetPosition().x) + " " + std::to_string(playerPaddle.GetPosition().y);
+
         sendto(clientSocket, message.c_str(), message.size(), 0, (sockaddr*)&serverAddr, sizeof(serverAddr));
 
         // À FAIRE : Gérer la réception de la position de l'adversaire et de la balle, et des autres données importantes
         //
         //
 
+        //if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
+        //{
+        //    playerPaddle.Move(-1);
+        //}
+        //if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
+        //{
+        //    playerPaddle.Move(1);
+        //}
+
         window.clear();
-        window.draw(shape);
+        playerPaddle.Draw(&window);
         window.display();
     }
-
+*/
 #pragma endregion
-
+    
+#pragma region NewSFMLWindow
+    App app = App();
+    app.Run();
+#pragma endregion
+    
 #pragma region Winsock cleanup
 
     closesocket(clientSocket);

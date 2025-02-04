@@ -70,6 +70,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnabled>false</VcpkgEnabled>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -131,7 +134,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="App.cpp" />
+    <ClCompile Include="Button.cpp" />
+    <ClCompile Include="AEntity.cpp" />
+    <ClCompile Include="EventCallback.cpp" />
+    <ClCompile Include="EventHandler.cpp" />
     <ClCompile Include="PongNetworkClient.cpp" />
+    <ClCompile Include="Paddle.cpp" />
+    <ClCompile Include="TextField.cpp" />
+    <ClCompile Include="UDPClient.cpp" />
+    <ClCompile Include="UDPService.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="App.h" />
+    <ClInclude Include="Button.h" />
+    <ClInclude Include="AEntity.h" />
+    <ClInclude Include="EventCallback.h" />
+    <ClInclude Include="EventCallback.inl" />
+    <ClInclude Include="EventHandler.h" />
+    <ClInclude Include="Paddle.h" />
+    <ClInclude Include="TextField.h" />
+    <ClInclude Include="UDPClient.h" />
+    <ClInclude Include="UDPService.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="EventCallback.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
