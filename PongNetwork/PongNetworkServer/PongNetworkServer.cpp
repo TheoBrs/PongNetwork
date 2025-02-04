@@ -60,7 +60,8 @@ int main()
 
     std::cout << "Serveur en attente de joueurs..." << std::endl;
 
-    float ballX = 400, ballY = 300;
+    float ballX = 400, ballY = 400;
+    float ballDirectionX = 3.2, ballDirectionY = 2.8;
 
     while (true) 
     {
@@ -76,8 +77,9 @@ int main()
 
             sscanf_s(buffer, "%d %f", &playerID, &paddleX);
 
-            // Add player if he's not already connected, or update its position
-            if (playerID == 0) 
+            // Add player if he's not already connected and there's less than 2 players, 
+            // or else update its position
+            if (playerID == 0 && players.size() <= 2)
             {
                 playerID = players.size() + 1;
                 
@@ -94,10 +96,13 @@ int main()
                     paddleY = 350;
                 }
 
+                // Add player to the unordered_map
                 players[playerID] = { clientAddr, sf::Vector2f(paddleX, paddleY)};
 
-                // Send the player its ID and position
-                std::string message = std::to_string(playerID) + " " + std::to_string(paddleX) + " " + std::to_string(paddleY);
+                // Send the player its ID and position, and the position and speed of the ball
+                std::string message = std::to_string(playerID) + " " + std::to_string(paddleX) + " " + std::to_string(paddleY) +
+                    " " + std::to_string(ballX) + " " + std::to_string(ballY) + " " + std::to_string(ballDirectionX) + " " + std::to_string(ballDirectionY);
+
                 sendto(serverSocket, message.c_str(), message.size(), 0, (sockaddr*)&players[playerID].addr, sizeof(players[playerID].addr));
             }
             else 
@@ -106,11 +111,13 @@ int main()
                 players[playerID].playerPosition.y = paddleY;
             }
 
+
+
             // Send updates to every players
             for (auto& [id, player] : players) 
             {
-                std::string message = std::to_string(playerID) + " " + std::to_string(paddleX) + " " +
-                    std::to_string(ballX) + " " + std::to_string(ballY);
+                std::string message = std::to_string(playerID) + " " + std::to_string(paddleX) + " " + std::to_string(paddleY) +
+                    " " + std::to_string(ballX) + " " + std::to_string(ballY) + " " + std::to_string(ballDirectionX) + " " + std::to_string(ballDirectionY);
 
                 sendto(serverSocket, message.c_str(), message.size(), 0, (sockaddr*)&player.addr, sizeof(player.addr));
             }
