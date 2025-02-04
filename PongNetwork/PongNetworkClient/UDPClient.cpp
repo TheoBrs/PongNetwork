@@ -6,6 +6,7 @@
 int UDPClient::Init()
 {
     UDPService::Init();
+    return 0;
 }
 
 void UDPClient::SendMessage(std::string message)
@@ -15,7 +16,7 @@ void UDPClient::SendMessage(std::string message)
 
 unsigned long long UDPClient::ReceiveMessage()
 {
-    return UDPService::ReceiveMessage();
+    return 0;
 }
 
 int UDPClient::TryConnect(const std::string& ip, unsigned port)
@@ -40,4 +41,5 @@ int UDPClient::TryConnect(const std::string& ip, unsigned port)
     }
 
     std::cout << "Demande de connexion envoyee au serveur." << std::endl;
+    return 0;
 }

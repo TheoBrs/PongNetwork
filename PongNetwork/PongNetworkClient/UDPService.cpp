@@ -30,5 +30,11 @@ int UDPService::Init()
     return 0;
 }
 
+void UDPService::UnInit()
+{
+    closesocket(m_socket);
+    WSACleanup();
+}
+
 
 

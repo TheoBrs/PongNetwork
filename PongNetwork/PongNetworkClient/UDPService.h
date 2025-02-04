@@ -13,5 +13,6 @@ protected:
 public:
     virtual int Init();
     virtual void SendMessage(std::string message){};
-    virtual unsigned long long ReceiveMessage(){};
+    virtual unsigned long long ReceiveMessage() = 0;
+    void UnInit();
 };
