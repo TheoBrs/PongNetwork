@@ -5,7 +5,7 @@
 #include "EventCallback.h"
 
 class Button;
-
+class TextField;
 class App
 {
 public:
@@ -17,7 +17,7 @@ public:
 private:
 	sf::CircleShape* m_baseShape;
 	sf::RectangleShape* m_testButton;
-	Button* m_button;
+	TextField* m_textField;
 
 	void Init();
 	void Update();

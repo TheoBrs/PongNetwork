@@ -11,10 +11,12 @@ void Button::CheckClick(const sf::Event::MouseButtonPressed* event)
     
     sf::Vector2f mousePosFloat = sf::Vector2f(sf::Mouse::getPosition(*App::Window));
     auto relativeRect = getTransform().transformRect(*m_bounds);
+
     
     if (relativeRect.contains(mousePosFloat))
     {
         OnClick();
+        OnClickEvent();
     }
 }
 
@@ -37,4 +39,6 @@ void Button::Init(const sf::Vector2f& position, const sf::Vector2f& size)
     {
         CheckClick(event);
     };
+
+    OnInit();
 }

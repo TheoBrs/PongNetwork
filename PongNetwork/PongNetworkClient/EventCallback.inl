@@ -12,12 +12,15 @@ size_t  EventCallback<_Fty, Args...>::operator+=(const std::function<_Fty(Args..
 template<typename  _Fty, typename... Args>
 void EventCallback<_Fty, Args...>::operator-=(size_t callbackId)
 {
+
     if (m_eventMap.find(callbackId) != m_eventMap.end()) {
-        auto callbackToRemove = m_eventMap[callbackId];
-        m_eventVector.erase(std::remove(m_eventVector.begin(), m_eventVector.end(), callbackToRemove), m_eventVector.end());
         m_eventMap.erase(callbackId);
+
+        m_eventVector.clear();
+        for (const auto& pair : m_eventMap) {
+            m_eventVector.push_back(pair.second);
+        }
     }
-    return *this;
 
 }
 

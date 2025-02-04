@@ -16,7 +16,7 @@ private:
 	
 public:
 	size_t  operator+=(const std::function<_Fty(Args...)>& callback);
-	void  operator-=(size_t callbackId);
+	void operator-=(size_t callbackId);
 	void operator()(Args... args);
 };
 

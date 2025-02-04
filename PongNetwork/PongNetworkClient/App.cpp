@@ -2,6 +2,7 @@
 #include "Button.h"
 #include "App.h"
 #include "EventHandler.h"
+#include "TextField.h"
 
 using namespace std::placeholders;
 
@@ -29,9 +30,9 @@ void App::Init()
 	m_baseShape = new sf::CircleShape(100.f);
 	m_baseShape->setFillColor(sf::Color::Green);
 
-	m_button = new Button();
-	m_button->Init(sf::Vector2f(500,500), sf::Vector2f(100,50));
-	m_button->OnClick += [this](){TestOnButtonClick();};
+	m_textField = new TextField();
+	m_textField->Init(sf::Vector2f(500,500), sf::Vector2f(100,50));
+	m_textField->OnClickEvent += [this](){TestOnButtonClick();};
 	
 	auto id3 = EventHandler::OnKeyPressed += [this](const sf::Event::KeyPressed* event) {TestHandleInput(event);};
 }
@@ -44,7 +45,7 @@ void App::Draw()
 {
 	Window->clear();
 	Window->draw(*m_baseShape);
-	Window->draw(*m_button);
+	Window->draw(*m_textField);
 	Window->display();
 }
 

@@ -141,6 +141,7 @@
     <ClCompile Include="EventHandler.cpp" />
     <ClCompile Include="PongNetworkClient.cpp" />
     <ClCompile Include="Paddle.cpp" />
+    <ClCompile Include="TextField.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -150,6 +151,7 @@
     <ClInclude Include="EventCallback.inl" />
     <ClInclude Include="EventHandler.h" />
     <ClInclude Include="Paddle.h" />
+    <ClInclude Include="TextField.h" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="EventCallback.inl" />
