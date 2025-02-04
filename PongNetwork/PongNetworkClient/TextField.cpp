@@ -1,7 +1,8 @@
+#include <iostream>
+#include <string>
 #include <SFMl/Graphics.hpp>
 #include "TextField.h"
 
-#include <iostream>
 
 #include "EventHandler.h"
 
@@ -36,9 +37,16 @@ void TextField::EndEnterText()
 void TextField::EnterText(const sf::Event::TextEntered* input)
 {
     std::cout << "Text entered\n";
-    std::string src = m_textField->getString();
-    src +=  input->unicode;
-    m_textField->setString(src);
+    std::string str = m_textField->getString();
+    if (input->unicode == U'\b' &&  str.length() > 0)
+    {
+        str = str.substr(0, str.length() - 1);
+    }
+    else
+    {
+        str +=  input->unicode;
+    }
+    m_textField->setString(str);
 }
 
 void TextField::HandleInputKey(const sf::Event::KeyPressed* event)

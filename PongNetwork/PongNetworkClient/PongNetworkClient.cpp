@@ -16,8 +16,8 @@ sf::Vector2f screenSize;
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode({ 800, 800 }), "Ultimate Pong Supreme Battle Royale Deluxe 2");
-    screenSize = sf::Vector2f(window.getSize());
+    // sf::RenderWindow window(sf::VideoMode({ 800, 800 }), "Ultimate Pong Supreme Battle Royale Deluxe 2");
+    // screenSize = sf::Vector2f(window.getSize());
 
 #pragma region Initialize Winsock, create socket, and setup server adress
 
@@ -87,7 +87,7 @@ int main()
 
 #pragma endregion
 
-    Paddle playerPaddle = Paddle(paddleX, paddleY, 20, 80, 500, screenSize);
+    //Paddle playerPaddle = Paddle(paddleX, paddleY, 20, 80, 500, screenSize);
 #pragma region Manage gameplay and graphics with SFML and send and receive data from server to keep being updated
 /*
     while (window.isOpen())
