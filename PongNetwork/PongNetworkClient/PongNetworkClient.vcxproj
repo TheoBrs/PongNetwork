@@ -138,6 +138,7 @@
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="AEntity.cpp" />
     <ClCompile Include="EventCallback.cpp" />
+    <ClCompile Include="EventHandler.cpp" />
     <ClCompile Include="PongNetworkClient.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -145,6 +146,11 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="AEntity.h" />
     <ClInclude Include="EventCallback.h" />
+    <ClInclude Include="EventCallback.inl" />
+    <ClInclude Include="EventHandler.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="EventCallback.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

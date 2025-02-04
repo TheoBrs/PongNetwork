@@ -1,10 +1,16 @@
 #include <iostream>
+#include "Button.h"
 #include "App.h"
+#include "EventHandler.h"
+
+using namespace std::placeholders;
+
+sf::RenderWindow* App::Window;
 
 void App::Run()
 {
 	Init();
-	while (m_window->isOpen())
+	while (Window->isOpen())
 	{
 		HandleEvents();
 		Update();
@@ -12,18 +18,22 @@ void App::Run()
 	}
 }
 
+sf::Vector2u App::GetWindowSize()
+{
+	return Window->getSize();
+}
+
 void App::Init()
 {
-	m_window = new sf::RenderWindow(sf::VideoMode({ 1920, 1080 }), "SFML works!");
+	Window = new sf::RenderWindow(sf::VideoMode({ 1920, 1080 }), "SFML works!");
 	m_baseShape = new sf::CircleShape(100.f);
 	m_baseShape->setFillColor(sf::Color::Green);
 
-	auto bind = std::bind(&App::TestCallback, this);
-	auto bind2 = std::bind(&App::Test2Callback, this);
-
-	m_callback += bind;
-	m_callback += bind2;
-	m_callback();
+	m_button = new Button();
+	m_button->Init(sf::Vector2f(500,500), sf::Vector2f(100,50));
+	m_button->OnClick += [this](){TestOnButtonClick();};
+	
+	auto id3 = EventHandler::OnKeyPressed += [this](const sf::Event::KeyPressed* event) {TestHandleInput(event);};
 }
 
 void App::Update()
@@ -32,27 +42,28 @@ void App::Update()
 
 void App::Draw()
 {
-	m_window->clear();
-	m_window->draw(*m_baseShape);
-	m_window->display();
+	Window->clear();
+	Window->draw(*m_baseShape);
+	Window->draw(*m_button);
+	Window->display();
 }
 
 void App::HandleEvents()
 {
-	while (const std::optional event = m_window->pollEvent())
-	{
-		if (event->is<sf::Event::Closed>())
-			m_window->close();
-	}
-
+	EventHandler::HandleEvent(Window);
+	// while (const std::optional event = m_window->pollEvent())
+	// {
+	// 	if (event->is<sf::Event::Closed>())
+	// 		m_window->close();
+	// }
 }
 
-void App::TestCallback()
+void App::TestOnButtonClick()
 {
-	std::cout<< "Callback 1" <<std::endl;
+	std::cout << "OnClickButton\n";
 }
 
-void App::Test2Callback()
+void App::TestHandleInput(const sf::Event::KeyPressed* event)
 {
-	std::cout<< "Callback 2" <<std::endl;
+	std::cout << "Key pressed !\n";
 }

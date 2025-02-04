@@ -4,23 +4,27 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 #include "EventCallback.h"
 
+class Button;
+
 class App
 {
 public:
 	void Run();
 
+	sf::Vector2u GetWindowSize();
+	static sf::RenderWindow* Window;
+	
 private:
-	sf::RenderWindow* m_window;
 	sf::CircleShape* m_baseShape;
 	sf::RectangleShape* m_testButton;
-	Utils::EventCallback<void()> m_callback;
+	Button* m_button;
 
 	void Init();
 	void Update();
 	void Draw();
 	void HandleEvents();
 
-	void TestCallback();
-	void Test2Callback();
+	void TestOnButtonClick();
+	void TestHandleInput(const sf::Event::KeyPressed* event);
 };
 

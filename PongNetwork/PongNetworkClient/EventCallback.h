@@ -1,48 +1,25 @@
 #pragma once
 #include <vector>
 #include <functional>
-
+#include <unordered_map>
+#include <algorithm>
 namespace Utils 
 {
-template<class _Fty>
+template<typename  _Fty, typename... Args>
 class EventCallback
 {
 private:
-	std::vector<std::function<_Fty>> m_eventVector;
+	std::vector<std::function<_Fty(Args...)>> m_eventVector;
 
+	std::unordered_map<size_t, std::function<_Fty(Args...)>> m_eventMap;
+	size_t nextId = 0;
+	
 public:
-	EventCallback& operator+=(const std::function<_Fty>& callback);
-	EventCallback& operator-=(const std::function<_Fty>& callback);
-	EventCallback& operator()();
+	size_t  operator+=(const std::function<_Fty(Args...)>& callback);
+	void  operator-=(size_t callbackId);
+	void operator()(Args... args);
 };
 
-template<class _Fty>
-EventCallback<_Fty>& EventCallback<_Fty>::operator+=(const std::function<_Fty>& callback)
-{
-	this->m_eventVector.push_back(callback);
-	return *this;
-}
-
-template<class _Fty>
-EventCallback<_Fty>& EventCallback<_Fty>::operator-=(const std::function<_Fty>& callback)
-{
-	this->m_eventVector.erase(std::remove(this->m_eventVector.begin(), this->m_eventVector.end(), 
-		callback), this->m_eventVector.end());
-	return *this;
-
-}
-
-template<class _Fty>
-EventCallback<_Fty>& EventCallback<_Fty>::operator()() 
-{
-	for (int i = 0; i < this->m_eventVector.size(); i++)
-	{
-		if (this->m_eventVector[i]) 
-		{
-			this->m_eventVector[i]();
-		}
-	}
-	return *this;
-}
+#include "EventCallback.inl"
 }
 
