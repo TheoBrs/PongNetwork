@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <string>
 #include <SFML/System/Vector2.hpp>
+#include <chrono>
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -13,20 +14,23 @@ struct Player
 {
     sockaddr_in addr;
     sf::Vector2f playerPosition;
-    float inputMove =0.0f;
+    float inputMove = 0.0f;
     int score = 0;
 };
 
+auto m_scoreClock = std::chrono::system_clock::now();
 std::unordered_map<int, Player*> players;
 
-int m_maxNumberOfPlayer = 2;
-bool m_fullLobbyMessageSent = false;
-
-float ballX = 960, ballY = 540;
-float ballDirectionX = 4.3, ballDirectionY = 3.7;
 int playerID = 0;
+int m_maxNumberOfPlayer = 2;
+int scoreClock = 0;
+
+float ballX = 800, ballY = 450;
+float ballDirectionX = 4.3, ballDirectionY = 3.7;
 float paddleX = -1;
 float paddleY = -1;
+
+bool m_fullLobbyMessageSent = false;
 
 void SendPadlePositions(SOCKET serverSocket)
 {
@@ -74,18 +78,18 @@ void Respawn(SOCKET serverSocket)
         {
             std::cout << "Player " << player.first << " position reset : 100, 440" << std::endl;
             player.second->playerPosition.x = 100;
-            player.second->playerPosition.y = 440;
+            player.second->playerPosition.y = 400;
         }
         else if (player.first == 1)
         {
             std::cout << "Player " << player.first << " position reset : 1820, 440" << std::endl;
-            player.second->playerPosition.x = 1820;
-            player.second->playerPosition.y = 440;
+            player.second->playerPosition.x = 1500;
+            player.second->playerPosition.y = 400;
         }
     }
 
     // Reset ball position
-    ballX = 960, ballY = 540;
+    ballX = 800, ballY = 450;
 
     // Send every new informations to every players
     SendBallPosition(serverSocket);
@@ -158,12 +162,12 @@ int main()
                 if (playerID == 0)
                 {
                     paddleX = 100;
-                    paddleY = 440;
+                    paddleY = 400;
                 }
                 else if (playerID == 1)
                 {
-                    paddleX = 1820;
-                    paddleY = 440;
+                    paddleX = 1500;
+                    paddleY = 400;
                 }
                 players[playerID] =  new Player{clientAddr, sf::Vector2f(paddleX, paddleY), 0};
                 std::string messageToSend("ConnectionResponse 0");
@@ -183,8 +187,10 @@ int main()
 
 #pragma region Player scored
 
-        if (packetType == "Score")
+        if (packetType == "Score" && std::chrono::system_clock::now() - m_scoreClock > std::chrono::seconds(1))
         {
+            m_scoreClock = std::chrono::system_clock::now();
+
             char type[50];
             int playerWhoScored;
             sscanf_s(buffer, "%s %d", &type, (unsigned)_countof(type), &playerWhoScored);
@@ -230,59 +236,6 @@ int main()
             //players[clientId].playerPosition.y += upAxis;
             SendPadlePositions(serverSocket);
         }
-#pragma endregion 
-        
-#pragma region Old Code
-        // int playerID = -1;
-        // float paddleX = -1;
-        // float paddleY = -1;
-        //
-        // sscanf_s(buffer, "%d %f", &playerID, &paddleX);
-        //
-        // // Add player if he's not already connected and there's less than 2 players, 
-        // // or else update its position
-        // if (playerID == 0 && players.size() <= 2)
-        // {
-        //     playerID = players.size() + 1;
-        //     
-        //     std::cout << "Joueur " << playerID << " connecte !" << std::endl;
-        //
-        //     if (playerID == 1)
-        //     {
-        //         paddleX = 100;
-        //         paddleY = 350;
-        //     }
-        //     else if (playerID == 2)
-        //     {
-        //         paddleX = 700;
-        //         paddleY = 350;
-        //     }
-        //
-        //     // Add player to the unordered_map
-        //     players[playerID] = { clientAddr, sf::Vector2f(paddleX, paddleY)};
-        //
-        //     // Send the player its ID and position, and the position and speed of the ball
-        //     std::string message = std::to_string(playerID) + " " + std::to_string(paddleX) + " " + std::to_string(paddleY) +
-        //         " " + std::to_string(ballX) + " " + std::to_string(ballY) + " " + std::to_string(ballDirectionX) + " " + std::to_string(ballDirectionY);
-        //
-        //     sendto(serverSocket, message.c_str(), message.size(), 0, (sockaddr*)&players[playerID].addr, sizeof(players[playerID].addr));
-        // }
-        // else 
-        // {
-        //     players[playerID].playerPosition.x = paddleX;
-        //     players[playerID].playerPosition.y = paddleY;
-        // }
-        //
-        //
-        //
-        // // Send updates to every players
-        // for (auto& [id, player] : players) 
-        // {
-        //     std::string message = std::to_string(playerID) + " " + std::to_string(paddleX) + " " + std::to_string(paddleY) +
-        //         " " + std::to_string(ballX) + " " + std::to_string(ballY) + " " + std::to_string(ballDirectionX) + " " + std::to_string(ballDirectionY);
-        //
-        //     sendto(serverSocket, message.c_str(), message.size(), 0, (sockaddr*)&player.addr, sizeof(player.addr));
-        // }
 #pragma endregion 
         
     }
