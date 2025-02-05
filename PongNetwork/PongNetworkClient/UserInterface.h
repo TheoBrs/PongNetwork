@@ -37,3 +37,7 @@ public:
     void SetPlayerName(int id, std::string name);
     void SetPlayerScore(int id, int score);
 };
+// code qui fait des _Struct_size_bytes_(
+//     appeler code qui fait des trucs
+//     feur
+//     )

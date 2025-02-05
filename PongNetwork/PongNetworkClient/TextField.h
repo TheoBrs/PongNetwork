@@ -14,11 +14,15 @@ private:
     bool m_isEnteringText;
     size_t m_callbackTextEnteredId;
     size_t m_callbackInputKeyId;
+    size_t m_callbackOnClickId;
     sf::Text* m_textField;
+    
     void StartEnterText();
     void EndEnterText();
     void EnterText(const sf::Event::TextEntered* input);
     void HandleInputKey(const sf::Event::KeyPressed* event);
+    void CheckOnClickOutside(const sf::Event::MouseButtonPressed* event);
+    
 protected:
     void OnClick() override;
     void OnInit() override;
@@ -26,4 +30,5 @@ protected:
 
 public:
     Utils::EventCallback<void, std::string> OnValidateText;
+    std::string GetText();
 };

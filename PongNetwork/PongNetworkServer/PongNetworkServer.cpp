@@ -16,6 +16,7 @@ struct Player
     sf::Vector2f playerPosition;
     float inputMove = 0.0f;
     int score = 0;
+    std::string name;
 };
 
 auto m_scoreClock = std::chrono::system_clock::now();
@@ -32,14 +33,44 @@ float paddleY = -1;
 
 bool m_fullLobbyMessageSent = false;
 
-void SendPadlePositions(SOCKET serverSocket)
+void SendPaddlesPositions(SOCKET serverSocket)
 {
     for (auto playerToSend: players)
     {
         for (auto playerInfo: players)
         {
             sf::Vector2f pos = playerInfo.second->playerPosition;
-            std::string messagePadle = "Padle " + std::to_string(playerInfo.first) + " " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(playerInfo.second->inputMove);
+            std::string messagePadle = "Paddle " + std::to_string(playerInfo.first) + " " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(playerInfo.second->inputMove);
+            sendto(serverSocket, messagePadle.c_str(), messagePadle.size(), 0, (sockaddr*)&playerToSend.second->addr, sizeof(playerToSend.second->addr));
+        }
+    }
+}
+
+void SendPaddleWithId(SOCKET serverSocket, int clientid)
+{
+    for (auto playerToSend: players)
+    {
+        sf::Vector2f pos = players[clientid]->playerPosition;
+        std::string messagePadle = "Paddle " + std::to_string(clientid) + " " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(players[clientid]->inputMove);
+        sendto(serverSocket, messagePadle.c_str(), messagePadle.size(), 0, (sockaddr*)&playerToSend.second->addr, sizeof(playerToSend.second->addr));
+
+    }
+}
+
+void SendNewPlayer(SOCKET serverSocket)
+{
+    for (auto playerToSend: players)
+    {
+        for (auto playerInfo: players)
+        {
+            sf::Vector2f pos = playerInfo.second->playerPosition;
+            std::string messagePadle =
+                "NewPlayer " + std::to_string(playerInfo.first) + " " +
+                std::to_string(pos.x) + " " +
+                std::to_string(pos.y) + " " +
+                std::to_string(playerInfo.second->inputMove) + " " +
+                playerInfo.second->name;
+            
             sendto(serverSocket, messagePadle.c_str(), messagePadle.size(), 0, (sockaddr*)&playerToSend.second->addr, sizeof(playerToSend.second->addr));
         }
     }
@@ -93,7 +124,7 @@ void Respawn(SOCKET serverSocket)
 
     // Send every new informations to every players
     SendBallPosition(serverSocket);
-    SendPadlePositions(serverSocket);
+    SendPaddlesPositions(serverSocket);
     SendScore(serverSocket);
 }
 
@@ -159,6 +190,11 @@ int main()
             std::cout << "Demande de connexion" << std::endl;
             if (players.size() < m_maxNumberOfPlayer)
             {
+                char type[50];
+                char name[100];
+                sscanf_s(buffer, "%s %s", &type, (unsigned)_countof(type), &name,  (unsigned)_countof(name));
+
+                
                 if (playerID == 0)
                 {
                     paddleX = 100;
@@ -169,12 +205,13 @@ int main()
                     paddleX = 1500;
                     paddleY = 400;
                 }
-                players[playerID] =  new Player{clientAddr, sf::Vector2f(paddleX, paddleY), 0};
+                players[playerID] =
+                    new Player{clientAddr, sf::Vector2f(paddleX, paddleY), 0,0,name};
                 std::string messageToSend("ConnectionResponse 0");
                 messageToSend += " " + std::to_string(playerID);
                 sendto(serverSocket, messageToSend.c_str(), messageToSend.size(), 0, (sockaddr*)&players[playerID]->addr, sizeof(players[playerID]->addr));
-                
-                SendPadlePositions(serverSocket);
+                SendNewPlayer(serverSocket);
+                //SendPaddlesPositions(serverSocket);
                 playerID++;
             }
             else
@@ -234,7 +271,7 @@ int main()
             players[clientId]->playerPosition = sf::Vector2f(posX, posY);
             players[clientId]->inputMove = upAxis;
             //players[clientId].playerPosition.y += upAxis;
-            SendPadlePositions(serverSocket);
+            SendPaddleWithId(serverSocket, clientId);
         }
 #pragma endregion 
         

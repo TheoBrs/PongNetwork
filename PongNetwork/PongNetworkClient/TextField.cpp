@@ -14,19 +14,16 @@ void TextField::StartEnterText()
         return;
     }
     m_isEnteringText = true;
-    m_callbackTextEnteredId = EventHandler::OnTextEntered += [this](const sf::Event::TextEntered* event)
-    {
-        EnterText(event);
-    };
-
-    m_callbackInputKeyId = EventHandler::OnKeyPressed += [this](const sf::Event::KeyPressed* event)
-    {
-        HandleInputKey(event);
-    };
+   
+    
 }
 
 void TextField::EndEnterText()
 {
+    if (!m_isEnteringText)
+    {
+        return;
+    }
     m_isEnteringText = false;
 
     OnValidateText(m_textField->getString());
@@ -37,24 +34,46 @@ void TextField::EndEnterText()
 
 void TextField::EnterText(const sf::Event::TextEntered* input)
 {
+    if (!m_isEnteringText)
+    {
+        return;
+    }
     std::string str = m_textField->getString();
     if (input->unicode == U'\b' &&  str.length() > 0)
     {
         str = str.substr(0, str.length() - 1);
     }
-    else
+    else if (input->unicode != U'\b')
     {
         str +=  input->unicode;
     }
     m_textField->setString(str);
+    auto center = m_textField->getGlobalBounds().size / 2.f;
+    auto localBounds = center + m_textField->getLocalBounds().position;
+    auto rounded = sf::Vector2f{ std::round(localBounds.x), std::round(localBounds.y) };
+    m_textField->setOrigin(rounded);
 }
 
 void TextField::HandleInputKey(const sf::Event::KeyPressed* event)
 {
+    if (!m_isEnteringText)
+    {
+        return;
+    }
     if (event->scancode == sf::Keyboard::Scancode::Enter)
     {
         EndEnterText();
     }
+}
+
+void TextField::CheckOnClickOutside(const sf::Event::MouseButtonPressed* event)
+{
+    if (event == nullptr || event->button != sf::Mouse::Button::Left || !m_isEnteringText || isMouseHoveringButton() )
+    {
+        return;
+    }
+
+    m_isEnteringText = false;
 }
 
 void TextField::OnClick()
@@ -66,8 +85,23 @@ void TextField::OnClick()
 void TextField::OnInit()
 {
     Button::OnInit();
+    m_callbackOnClickId = EventHandler::OnMouseButtonPressed += [this] (const sf::Event::MouseButtonPressed* event)
+    {
+        CheckOnClickOutside(event);
+    };
+    m_callbackTextEnteredId = EventHandler::OnTextEntered += [this](const sf::Event::TextEntered* event)
+    {
+        EnterText(event);
+    };
+
+    m_callbackInputKeyId = EventHandler::OnKeyPressed += [this](const sf::Event::KeyPressed* event)
+    {
+        HandleInputKey(event);
+    };
     m_textField = new sf::Text(*App::MainFont);
     m_textField->setFillColor(sf::Color::Black);
+    m_textField->setPosition({m_shape->getSize().x/2, m_shape->getSize().y/2});
+
 }
 
 void TextField::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -79,4 +113,9 @@ void TextField::draw(sf::RenderTarget& target, sf::RenderStates states) const
     }
     states.transform.combine(getTransform());
     target.draw(*m_textField, states);
+}
+
+std::string TextField::GetText()
+{
+    return m_textField->getString();
 }

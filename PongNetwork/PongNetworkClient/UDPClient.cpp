@@ -40,7 +40,7 @@ int UDPClient::ReceiveMessage(char (&buffer)[BUFFER_SIZE])
     return bytesReceived;
 }
 
-int UDPClient::TryConnect(const std::string& ip, unsigned port)
+int UDPClient::TryConnect(const std::string& ip, unsigned port, std::string name)
 {
     const char* cstr = ip.c_str(); 
     m_serverAddr.sin_family = AF_INET;
@@ -53,7 +53,7 @@ int UDPClient::TryConnect(const std::string& ip, unsigned port)
 
     std::cout << "Tentative de connexion au serveur..." << std::endl;
 
-    std::string message = "ConnectionRequest";
+    std::string message = "ConnectionRequest " + name;
     SendMessageUDP(message);
 
     std::cout << "Demande de connexion envoyee au serveur." << std::endl;
