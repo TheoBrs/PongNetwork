@@ -18,8 +18,8 @@ struct Player
     int score = 0;
 };
 
-std::unordered_map<int, Player> players;
 auto m_scoreClock = std::chrono::system_clock::now();
+std::unordered_map<int, Player*> players;
 
 int playerID = 0;
 int m_maxNumberOfPlayer = 2;
@@ -38,9 +38,9 @@ void SendPadlePositions(SOCKET serverSocket)
     {
         for (auto playerInfo: players)
         {
-            sf::Vector2f pos = playerInfo.second.playerPosition;
-            std::string messagePadle = "Padle " + std::to_string(playerInfo.first) + " " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(playerInfo.second.inputMove);
-            sendto(serverSocket, messagePadle.c_str(), messagePadle.size(), 0, (sockaddr*)&playerToSend.second.addr, sizeof(playerToSend.second.addr));
+            sf::Vector2f pos = playerInfo.second->playerPosition;
+            std::string messagePadle = "Padle " + std::to_string(playerInfo.first) + " " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(playerInfo.second->inputMove);
+            sendto(serverSocket, messagePadle.c_str(), messagePadle.size(), 0, (sockaddr*)&playerToSend.second->addr, sizeof(playerToSend.second->addr));
         }
     }
 }
@@ -51,7 +51,7 @@ void SendBallPosition(SOCKET serverSocket)
     {
         std::string messageToSend("Ball");
         messageToSend += " " + std::to_string(ballX) + " " + std::to_string(ballY) + " " + std::to_string(ballDirectionX) + " " + std::to_string(ballDirectionY);
-        sendto(serverSocket, messageToSend.c_str(), messageToSend.size(), 0, (sockaddr*)&playerToSend.second.addr, sizeof(playerToSend.second.addr));
+        sendto(serverSocket, messageToSend.c_str(), messageToSend.size(), 0, (sockaddr*)&playerToSend.second->addr, sizeof(playerToSend.second->addr));
     }
 }
 
@@ -61,10 +61,10 @@ void SendScore(SOCKET serverSocket)
     {
         for (auto playerInfo : players)
         {
-            int playerScore = playerInfo.second.score;
+            int playerScore = playerInfo.second->score;
 
             std::string messagePadle = "Score " + std::to_string(playerInfo.first) + " " + std::to_string(playerScore);
-            sendto(serverSocket, messagePadle.c_str(), messagePadle.size(), 0, (sockaddr*)&playerToSend.second.addr, sizeof(playerToSend.second.addr));
+            sendto(serverSocket, messagePadle.c_str(), messagePadle.size(), 0, (sockaddr*)&playerToSend.second->addr, sizeof(playerToSend.second->addr));
         }
     }
 }
@@ -77,14 +77,14 @@ void Respawn(SOCKET serverSocket)
         if (player.first == 0)
         {
             std::cout << "Player " << player.first << " position reset : 100, 440" << std::endl;
-            player.second.playerPosition.x = 100;
-            player.second.playerPosition.y = 400;
+            player.second->playerPosition.x = 100;
+            player.second->playerPosition.y = 400;
         }
         else if (player.first == 1)
         {
             std::cout << "Player " << player.first << " position reset : 1820, 440" << std::endl;
-            player.second.playerPosition.x = 1500;
-            player.second.playerPosition.y = 400;
+            player.second->playerPosition.x = 1500;
+            player.second->playerPosition.y = 400;
         }
     }
 
@@ -169,10 +169,10 @@ int main()
                     paddleX = 1500;
                     paddleY = 400;
                 }
-                players[playerID] = {clientAddr, sf::Vector2f(paddleX, paddleY), 0};
+                players[playerID] =  new Player{clientAddr, sf::Vector2f(paddleX, paddleY), 0};
                 std::string messageToSend("ConnectionResponse 0");
                 messageToSend += " " + std::to_string(playerID);
-                sendto(serverSocket, messageToSend.c_str(), messageToSend.size(), 0, (sockaddr*)&players[playerID].addr, sizeof(players[playerID].addr));
+                sendto(serverSocket, messageToSend.c_str(), messageToSend.size(), 0, (sockaddr*)&players[playerID]->addr, sizeof(players[playerID]->addr));
                 
                 SendPadlePositions(serverSocket);
                 playerID++;
@@ -196,7 +196,7 @@ int main()
             sscanf_s(buffer, "%s %d", &type, (unsigned)_countof(type), &playerWhoScored);
 
             // Add a point to the score of the player who scored
-            players[playerWhoScored].score += 1;
+            players[playerWhoScored]->score += 1;
 
             std::cout << "Le joueur " << playerWhoScored << " a marque !" << std::endl;
             
@@ -217,7 +217,7 @@ int main()
                 std::string messageToSend("LobbyFull");
                 messageToSend += " " + std::to_string(ballX) + " " + std::to_string(ballY) +
                     " " + std::to_string(ballDirectionX) + " " + std::to_string(ballDirectionY);
-                sendto(serverSocket, messageToSend.c_str(), messageToSend.size(), 0, (sockaddr*)&playerToSend.second.addr, sizeof(playerToSend.second.addr));
+                sendto(serverSocket, messageToSend.c_str(), messageToSend.size(), 0, (sockaddr*)&playerToSend.second->addr, sizeof(playerToSend.second->addr));
             }
         }
 
@@ -231,8 +231,8 @@ int main()
             float upAxis;
             float posX, posY;
             sscanf_s(buffer, "%s %d %f %f %f", &type, (unsigned)_countof(type), &clientId, &upAxis, &posX, &posY);
-            players[clientId].playerPosition = sf::Vector2f(posX, posY);
-            players[clientId].inputMove = upAxis;
+            players[clientId]->playerPosition = sf::Vector2f(posX, posY);
+            players[clientId]->inputMove = upAxis;
             //players[clientId].playerPosition.y += upAxis;
             SendPadlePositions(serverSocket);
         }

@@ -8,10 +8,12 @@
 #include "TextField.h"
 #include "UDPClient.h"
 #include "Ball.h"
+#include "UserInterface.h"
 
 using namespace std::placeholders;
 
 sf::RenderWindow* App::Window;
+sf::Font* App::MainFont = nullptr;
 
 void App::Run()
 {
@@ -82,6 +84,7 @@ void App::HandleServerMessages()
 			if (player->ClientId == clientId)
 			{
 				player->score = newScore;
+				m_userInterface->SetPlayerScore(clientId, newScore);
 				std::cout << "Player " << player->ClientId << " score is " << player->score << std::endl;
 			}
 		}
@@ -101,7 +104,12 @@ void App::HandleServerMessages()
 
 void App::Init()
 {
-	
+	MainFont = new sf::Font();
+	if (!MainFont->openFromFile("Fonts/arial/arial.ttf"))
+	{
+		std::cout << "Failed to load font\n";
+		return;
+	}
 	m_udpClient = new UDPClient();
 	m_udpClient->Init();
 	Window = new sf::RenderWindow(sf::VideoMode({ 1600, 900 }), "SFML works!", sf::Style::Titlebar | sf::Style::Close);
@@ -110,6 +118,8 @@ void App::Init()
 	m_textField->Init(sf::Vector2f(760,245), sf::Vector2f(400,100));
 	m_eventValidateTextId = m_textField->OnValidateText += [this](std::string text)
 	{EventValidateTextCallback(text);};
+	m_userInterface = new UserInterface();
+	m_userInterface->Init();
 	
 }
 
@@ -119,7 +129,6 @@ void App::Update()
 	{
 		player->Character->Move(player->InputMove);
 	}
-
 	if (m_twoPlayerJoined)
 	{
 		ball->Move();
@@ -168,8 +177,9 @@ void App::Draw()
 		{
 			ball->Draw(Window);
 		}
+		Window->draw(*m_userInterface);
 
-		// Dessiner le score à l'écran
+		// Dessiner le score ï¿½ l'ï¿½cran
 	}
 	Window->display();
 }
@@ -225,6 +235,7 @@ void App::HandlePadleMessage(char messageBuffer[])
 		}
 		newPlayer->InputMove = upAxis;
 		m_players.push_back(newPlayer);
+		m_userInterface->AddPlayer(clientId, "Player " + std::to_string(clientId), true);
 	}
 
 }

@@ -15,7 +15,6 @@ private:
     size_t m_callbackTextEnteredId;
     size_t m_callbackInputKeyId;
     sf::Text* m_textField;
-    sf::Font* m_font;
     void StartEnterText();
     void EndEnterText();
     void EnterText(const sf::Event::TextEntered* input);
