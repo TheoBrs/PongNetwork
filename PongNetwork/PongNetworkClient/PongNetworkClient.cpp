@@ -96,6 +96,11 @@ int main()
     Paddle* playerPaddle = new Paddle(paddleX, paddleY, 20, 80, 500, screenSize);
     Ball* ball = new Ball(ballX, ballY, 10, sf::Vector2f(ballDirectionX, ballDirectionY), screenSize);
 
+    std::string score = "";
+
+    // 1 : Left | 2 : Right | 3 : Up | 4 : Down
+    int sideOfScore = 0;
+
 #pragma region Manage gameplay and graphics with SFML and send and receive data from server to keep being updated
 
     while (window.isOpen())
@@ -127,8 +132,26 @@ int main()
 
         ball->Move();
         ball->OnPaddleCollision(playerPaddle);
+        
+        if (ball->GetPosition().x - (ball->GetShape().getRadius() * 2) <= 0)
+        {
+            sideOfScore = 1;
+
+            // Send which side the ball is to the server to determine who scored
+            std::string message = std::to_string(sideOfScore);
+            sendto(clientSocket, message.c_str(), message.size(), 0, (sockaddr*)&serverAddr, sizeof(serverAddr));
+        }
+        if (ball->GetPosition().x >= screenSize.x)
+        {
+            sideOfScore = 2;
+
+            // Send which side the ball is to the server to determine who scored
+            std::string message = std::to_string(sideOfScore);
+            sendto(clientSocket, message.c_str(), message.size(), 0, (sockaddr*)&serverAddr, sizeof(serverAddr));
+        }
 
         window.clear();
+        // Dessiner le score à l'écran
         playerPaddle->Draw(&window);
         ball->Draw(&window);
         window.display();

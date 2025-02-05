@@ -24,6 +24,7 @@ void Ball::Draw(sf::RenderWindow* window)
 
 void Ball::OnWallCollision()
 {
+	/*
 	// Left collision
 	if (shape.getPosition().x <= 0)
 	{
@@ -37,6 +38,7 @@ void Ball::OnWallCollision()
 		shape.setPosition(sf::Vector2f(screenSize.x - (shape.getRadius() * 2), shape.getPosition().y));
 		direction.x = -direction.x;
 	}
+	*/
 
 	// Up collision
 	if (shape.getPosition().y <= 0)
