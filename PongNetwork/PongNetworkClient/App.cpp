@@ -115,6 +115,11 @@ void App::Init()
 
 void App::Update()
 {
+	for (auto player: m_players)
+	{
+		player->Character->Move(player->InputMove);
+	}
+
 	if (m_twoPlayerJoined)
 	{
 		ball->Move();
@@ -156,7 +161,7 @@ void App::Draw()
 	{
 		for (auto player: m_players)
 		{
-			player.Character->Draw(Window);
+			player->Character->Draw(Window);
 		}
 
 		if (m_twoPlayerJoined)
@@ -176,8 +181,10 @@ void App::HandleEvents()
 
 void App::JoinGame()
 {
-	m_eventplayerInputId = EventHandler::OnKeyPressed += [this](const sf::Event::KeyPressed* event)
+	m_eventPlayerInputPressedId = EventHandler::OnKeyPressed += [this](const sf::Event::KeyPressed* event)
 	{EventKeyPressedCallback(event);};
+	m_eventPlayerInputReleasedId = EventHandler::OnKeyReleased += [this](const sf::Event::KeyReleased* event)
+	{EventKeyReleasedCallback(event);};
 	m_textField->OnValidateText -= m_eventValidateTextId;
 
 	
@@ -188,33 +195,56 @@ void App::HandlePadleMessage(char messageBuffer[])
 	char type[50];
 	int clientId;
 	float posX, posY;
-	sscanf_s(messageBuffer, "%s %d %f %f %d", &type, (unsigned)_countof(type), &clientId, &posX, &posY);
+	float upAxis;
+	sscanf_s(messageBuffer, "%s %d %f %f %f", &type, (unsigned)_countof(type), &clientId, &posX, &posY, &upAxis);
+
+	std::cout << "[PADDLE] Client: " << clientId
+	<< ", Position: (" << posX << ", " << posY << ")"
+	<< ", UpAxis: " << upAxis << std::endl;
 	
 	bool isPLayerInstanciated = false;
 	for (auto player: m_players)
 	{
-		if (player.ClientId == clientId)
+		if (player->ClientId == clientId)
 		{
 			isPLayerInstanciated = true;
-			player.Character->SetPosition(sf::Vector2f(posX, posY));
+			player->Character->SetPosition(sf::Vector2f(posX, posY));
+			player->InputMove = upAxis;
 		}
 	}
 
 	if (!isPLayerInstanciated)
 	{
-		Player newPlayer = Player();
-		newPlayer.ClientId = clientId;
-		newPlayer.Character =
-			new Paddle(posX, posY, 20, 80, 500, sf::Vector2f(Window->getSize()));
+		Player* newPlayer = new Player();
+		newPlayer->ClientId = clientId;
+		newPlayer->Character =
+			new Paddle(posX, posY, 20, 80, 10, sf::Vector2f(Window->getSize()));
+		if (clientId == m_clientId)
+		{
+	         m_paddle = newPlayer->Character;
+		}
+		newPlayer->InputMove = upAxis;
 		m_players.push_back(newPlayer);
 	}
 
 }
 
+void App::OnChangeUpAxis()
+{
+	std::string messageToSend;
+	messageToSend +=
+		"InputMove "
+	+ std::to_string(m_clientId) + " "
+	+ std::to_string(m_inputMove) + " "
+	+ std::to_string(m_paddle->GetPosition().x) + " "
+	+ std::to_string(m_paddle->GetPosition().y);
+	m_udpClient->SendMessageUDP(messageToSend);
+}
+
 void App::EventKeyPressedCallback(const sf::Event::KeyPressed* event)
 {
-	int upAxis = 0;
-	int speed = 10;
+	float upAxis = 0;
+	int speed = 1;
 	if (event->scancode == sf::Keyboard::Scancode::Up)
 	{
 		upAxis-= 1 * speed;
@@ -223,13 +253,33 @@ void App::EventKeyPressedCallback(const sf::Event::KeyPressed* event)
 	{
 		upAxis+= 1 * speed;
 	}
-	if (upAxis == 0)
+
+	if (upAxis == m_inputMove)
 	{
 		return;
 	}
-	std::string messageToSend;
-	messageToSend += "InputMove " + std::to_string(m_clientId) + " " + std::to_string(upAxis);
-	m_udpClient->SendMessageUDP(messageToSend);
+	m_inputMove = upAxis;
+	OnChangeUpAxis();
+}
+
+void App::EventKeyReleasedCallback(const sf::Event::KeyReleased* event)
+{
+	float upAxis = m_inputMove;
+	int speed = 1;
+	if (event->scancode == sf::Keyboard::Scancode::Up)
+	{
+		upAxis+= 1 ;
+	}
+	if (event->scancode == sf::Keyboard::Scancode::Down)
+	{
+		upAxis-= 1 ;
+	}
+	if (upAxis == m_inputMove)
+	{
+		return;
+	}
+	m_inputMove = upAxis;
+	OnChangeUpAxis();
 }
 
 void App::EventValidateTextCallback(std::string text)
