@@ -79,10 +79,10 @@ void App::HandleServerMessages()
 
 		for (auto player : m_players)
 		{
-			if (player.ClientId == clientId)
+			if (player->ClientId == clientId)
 			{
-				player.score = newScore;
-				std::cout << "Player " << player.ClientId << " score is " << player.score << std::endl;
+				player->score = newScore;
+				std::cout << "Player " << player->ClientId << " score is " << player->score << std::endl;
 			}
 		}
 	}
@@ -125,7 +125,7 @@ void App::Update()
 		ball->Move();
 		for (auto player : m_players)
 		{
-			ball->OnPaddleCollision(player.Character);
+			ball->OnPaddleCollision(player->Character);
 		}
 		
 		if (ball->GetPosition().x - (ball->GetShape().getRadius() * 2) <= 0)
