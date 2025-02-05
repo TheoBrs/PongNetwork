@@ -2,13 +2,12 @@
 #include <sstream>
 #include <string>
 
-
 #include "Button.h"
 #include "App.h"
 #include "EventHandler.h"
 #include "TextField.h"
 #include "UDPClient.h"
-#include "Paddle.h"
+#include "Ball.h"
 
 using namespace std::placeholders;
 
@@ -57,11 +56,46 @@ void App::HandleServerMessages()
 			m_isServerJoined = true;
 			JoinGame();
 		}
-
 	}
 	else if (messageType == "Padle")
 	{
 		HandlePadleMessage(buffer);
+	}
+	else if (messageType == "Ball")
+	{
+		char type[50];
+		float ballX, ballY;
+		float ballDirectionX, ballDirectionY;
+		sscanf_s(buffer, "%s %f %f %f %f", &type, (unsigned)_countof(type), &ballX, &ballY, &ballDirectionX, &ballDirectionY);
+
+		ball = new Ball(ballX, ballY, 10, sf::Vector2f(ballDirectionX, ballDirectionY), sf::Vector2f(GetWindowSize()));
+	}
+	else if (messageType == "Score")
+	{
+		char type[50];
+		int clientId;
+		int newScore;
+		sscanf_s(buffer, "%s %d %d", &type, (unsigned)_countof(type), &clientId, &newScore);
+
+		for (auto player : m_players)
+		{
+			if (player.ClientId == clientId)
+			{
+				player.score = newScore;
+				std::cout << "Player " << player.ClientId << " score is " << player.score << std::endl;
+			}
+		}
+	}
+	else if (messageType == "LobbyFull")
+	{
+		m_twoPlayerJoined = true;
+
+		char type[50];
+		float ballX, ballY;
+		float ballDirectionX, ballDirectionY;
+		sscanf_s(buffer, "%s %f %f %f %f", &type, (unsigned)_countof(type), &ballX, &ballY, &ballDirectionX, &ballDirectionY);
+
+		ball = new Ball(ballX, ballY, 10, sf::Vector2f(ballDirectionX, ballDirectionY), sf::Vector2f(GetWindowSize()));
 	}
 }
 
@@ -81,6 +115,34 @@ void App::Init()
 
 void App::Update()
 {
+	if (m_twoPlayerJoined)
+	{
+		ball->Move();
+		for (auto player : m_players)
+		{
+			ball->OnPaddleCollision(player.Character);
+		}
+		
+		if (ball->GetPosition().x - (ball->GetShape().getRadius() * 2) <= 0)
+		{
+			playerWhoScored = 1;
+
+			// Send which side the ball is to the server to determine who scored
+			std::string messageToSend = "Score";
+			messageToSend += " " + std::to_string(playerWhoScored);
+			m_udpClient->SendMessageUDP(messageToSend);
+		}
+
+		if (ball->GetPosition().x >= GetWindowSize().x)
+		{
+			playerWhoScored = 0;
+
+			// Send which side the ball is to the server to determine who scored
+			std::string messageToSend = "Score";
+			messageToSend += " " + std::to_string(playerWhoScored);
+			m_udpClient->SendMessageUDP(messageToSend);
+		}
+	}
 }
 
 void App::Draw()
@@ -96,6 +158,13 @@ void App::Draw()
 		{
 			player.Character->Draw(Window);
 		}
+
+		if (m_twoPlayerJoined)
+		{
+			ball->Draw(Window);
+		}
+
+		// Dessiner le score à l'écran
 	}
 	Window->display();
 }
@@ -119,7 +188,7 @@ void App::HandlePadleMessage(char messageBuffer[])
 	char type[50];
 	int clientId;
 	float posX, posY;
-	sscanf_s(messageBuffer, "%s %d %f %f", &type, (unsigned)_countof(type), &clientId, &posX, &posY);
+	sscanf_s(messageBuffer, "%s %d %f %f %d", &type, (unsigned)_countof(type), &clientId, &posX, &posY);
 	
 	bool isPLayerInstanciated = false;
 	for (auto player: m_players)
@@ -139,7 +208,7 @@ void App::HandlePadleMessage(char messageBuffer[])
 			new Paddle(posX, posY, 20, 80, 500, sf::Vector2f(Window->getSize()));
 		m_players.push_back(newPlayer);
 	}
-		
+
 }
 
 void App::EventKeyPressedCallback(const sf::Event::KeyPressed* event)

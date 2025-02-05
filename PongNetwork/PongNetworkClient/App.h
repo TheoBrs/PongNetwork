@@ -8,11 +8,13 @@ class Button;
 class TextField;
 class UDPClient;
 class Paddle;
+class Ball;
 
 struct Player
 {
 	int ClientId = -1;
 	Paddle* Character = nullptr;
+	int score = 0;
 };
 
 class App
@@ -28,12 +30,18 @@ private:
 	TextField* m_textField;
 	UDPClient* m_udpClient;
 	std::vector<Player> m_players;
-	
+	Ball* ball;
+	std::string scoreText = "";
+
+	// 1 : Left | 2 : Right | 3 : Up | 4 : Down
+	int playerWhoScored = 0;
+
 	int m_clientId = -1;
 	int m_eventValidateTextId = -1;
 	int m_eventplayerInputId = -1;
 
 	bool m_isServerJoined = false;
+	bool m_twoPlayerJoined = false;
 	
 	void HandleServerMessages();
 	void Init();

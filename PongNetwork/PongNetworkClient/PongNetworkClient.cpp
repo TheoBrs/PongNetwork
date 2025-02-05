@@ -117,19 +117,6 @@ int main()
 
         sendto(clientSocket, message.c_str(), message.size(), 0, (sockaddr*)&serverAddr, sizeof(serverAddr));
 
-        // À FAIRE : Gérer la réception de la position de l'adversaire et de la balle, et des autres données importantes
-        //
-        //
-
-        //if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
-        //{
-        //    playerPaddle.Move(-1);
-        //}
-        //if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
-        //{
-        //    playerPaddle.Move(1);
-        //}
-
         ball->Move();
         ball->OnPaddleCollision(playerPaddle);
         
