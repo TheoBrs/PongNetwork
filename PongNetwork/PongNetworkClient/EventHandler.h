@@ -13,6 +13,7 @@ class EventHandler
 public:
     static Utils::EventCallback<void> OnWindowClose;
     static Utils::EventCallback<void, const sf::Event::KeyPressed*> OnKeyPressed;
+    static Utils::EventCallback<void, const sf::Event::KeyReleased*> OnKeyReleased;
     static Utils::EventCallback<void, const sf::Event::MouseButtonPressed*> OnMouseButtonPressed;
     static Utils::EventCallback<void, const sf::Event::TextEntered*> OnTextEntered;
     

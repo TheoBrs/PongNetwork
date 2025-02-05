@@ -13,6 +13,7 @@ struct Player
 {
     sockaddr_in addr;
     sf::Vector2f playerPosition;
+    float inputMove =0.0f;
 };
 
 std::unordered_map<int, Player> players;
@@ -25,7 +26,7 @@ void SendPadlePositions(SOCKET serverSocket)
         for (auto playerInfo: players)
         {
             sf::Vector2f pos = playerInfo.second.playerPosition;
-            std::string messagePadle = "Padle " + std::to_string(playerInfo.first) + " " + std::to_string(pos.x) + " " + std::to_string(pos.y);
+            std::string messagePadle = "Padle " + std::to_string(playerInfo.first) + " " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(playerInfo.second.inputMove);
             sendto(serverSocket, messagePadle.c_str(), messagePadle.size(), 0, (sockaddr*)&playerToSend.second.addr, sizeof(playerToSend.second.addr));
         }
     }
@@ -108,7 +109,7 @@ int main()
                     paddleX = 1820;
                     paddleY = 350;
                 }
-                players[playerID] = {clientAddr, sf::Vector2f(paddleX, paddleY)};
+                players[playerID] = {clientAddr, sf::Vector2f(paddleX, paddleY), 0};
                 std::string messageToSend("ConnectionResponse 0");
                 messageToSend += " " + std::to_string(playerID);
                 sendto(serverSocket, messageToSend.c_str(), messageToSend.size(), 0, (sockaddr*)&players[playerID].addr, sizeof(players[playerID].addr));
@@ -130,9 +131,12 @@ int main()
         {
             char type[50];
             int clientId;
-            int upAxis;
-            sscanf_s(buffer, "%s %d %d", &type, (unsigned)_countof(type), &clientId, &upAxis);
-            players[clientId].playerPosition.y += upAxis;
+            float upAxis;
+            float posX, posY;
+            sscanf_s(buffer, "%s %d %f %f %f", &type, (unsigned)_countof(type), &clientId, &upAxis, &posX, &posY);
+            players[clientId].playerPosition = sf::Vector2f(posX, posY);
+            players[clientId].inputMove = upAxis;
+            //players[clientId].playerPosition.y += upAxis;
             SendPadlePositions(serverSocket);
         }
 #pragma endregion 
