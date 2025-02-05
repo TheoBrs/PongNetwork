@@ -15,7 +15,7 @@
 sf::Vector2f screenSize;
 
 int main()
-{
+{/*
     sf::RenderWindow window(sf::VideoMode({ 800, 800 }), "Ultimate Pong Supreme Battle Royale Deluxe 2");
     screenSize = sf::Vector2f(window.getSize());
     window.setFramerateLimit(60);
@@ -135,17 +135,17 @@ int main()
     }
 
 #pragma endregion
-    
+    */
 #pragma region NewSFMLWindow
-    //App app = App();
-    //app.Run();
+    App app = App();
+    app.Run();
 #pragma endregion
     
 #pragma region Winsock cleanup
-
+/*
     closesocket(clientSocket);
     WSACleanup();
-
+*/
 #pragma endregion
 
     return 0;

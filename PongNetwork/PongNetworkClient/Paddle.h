@@ -14,7 +14,7 @@ public:
 
     void Move(int direction);
     void Draw(sf::RenderWindow* window);
-
+    void SetPosition(sf::Vector2f newPosition);
     sf::RectangleShape GetShape() const;
     sf::Vector2f GetPosition() const;
 };
