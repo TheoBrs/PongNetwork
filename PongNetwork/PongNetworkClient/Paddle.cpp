@@ -12,9 +12,12 @@ Paddle::Paddle(float x, float y, float width, float height, float speed, sf::Vec
 
 void Paddle::Move(int direction)
 {
+    sf::Vector2f startPosition = shape.getPosition();
+    shape.move(sf::Vector2f(0, direction * speed));
+    
     if (shape.getPosition().y < 0 && shape.getPosition().y + shape.getSize().y > screenSize.y)
     {
-        shape.move(sf::Vector2f(0, direction * speed));
+        shape.setPosition(startPosition);
     }
 }
 
