@@ -4,6 +4,7 @@
 #include "TextField.h"
 
 
+#include "App.h"
 #include "EventHandler.h"
 
 void TextField::StartEnterText()
@@ -65,13 +66,7 @@ void TextField::OnClick()
 void TextField::OnInit()
 {
     Button::OnInit();
-    m_font = new sf::Font();
-    if (!m_font->openFromFile("Fonts/arial/arial.ttf"))
-    {
-        std::cout << "Failed to load font\n";
-        return;
-    }
-    m_textField = new sf::Text(*m_font);
+    m_textField = new sf::Text(*App::MainFont);
     m_textField->setFillColor(sf::Color::Black);
 }
 

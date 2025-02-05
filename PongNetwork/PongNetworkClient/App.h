@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/CircleShape.hpp>
+#include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include "EventCallback.h"
 
@@ -9,6 +10,7 @@ class TextField;
 class UDPClient;
 class Paddle;
 class Ball;
+class UserInterface;
 
 struct Player
 {
@@ -25,6 +27,7 @@ public:
 
 	sf::Vector2u GetWindowSize();
 	static sf::RenderWindow* Window;
+	static sf::Font* MainFont;
 	
 private:
 	sf::RectangleShape* m_testButton;
@@ -32,7 +35,8 @@ private:
 	UDPClient* m_udpClient;
 	Ball* ball;
 	std::string scoreText = "";
-
+	UserInterface* m_userInterface;
+	
 	// 1 : Left | 2 : Right | 3 : Up | 4 : Down
 	int playerWhoScored = 0;
 
