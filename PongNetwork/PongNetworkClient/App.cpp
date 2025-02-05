@@ -104,7 +104,7 @@ void App::Init()
 	
 	m_udpClient = new UDPClient();
 	m_udpClient->Init();
-	Window = new sf::RenderWindow(sf::VideoMode({ 1920, 1080 }), "SFML works!");
+	Window = new sf::RenderWindow(sf::VideoMode({ 1600, 900 }), "SFML works!", sf::Style::Titlebar | sf::Style::Close);
 	Window->setFramerateLimit(60);
 	m_textField = new TextField();
 	m_textField->Init(sf::Vector2f(760,245), sf::Vector2f(400,100));
@@ -132,7 +132,7 @@ void App::Update()
 		{
 			playerWhoScored = 1;
 
-			// Send which side the ball is to the server to determine who scored
+			// Send which player scored to the server
 			std::string messageToSend = "Score";
 			messageToSend += " " + std::to_string(playerWhoScored);
 			m_udpClient->SendMessageUDP(messageToSend);
@@ -142,7 +142,7 @@ void App::Update()
 		{
 			playerWhoScored = 0;
 
-			// Send which side the ball is to the server to determine who scored
+			// Send which player scored to the server
 			std::string messageToSend = "Score";
 			messageToSend += " " + std::to_string(playerWhoScored);
 			m_udpClient->SendMessageUDP(messageToSend);
