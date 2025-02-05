@@ -10,6 +10,6 @@ public:
     int Init() override;
     void SendMessageUDP(std::string message) override;
     int ReceiveMessage(char (&buffer)[BUFFER_SIZE]) override;
-    int TryConnect(const std::string& ip, unsigned int port);
+    int TryConnect(const std::string& ip, unsigned int port, std::string name);
 
 };

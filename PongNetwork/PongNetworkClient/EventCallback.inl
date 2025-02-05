@@ -28,7 +28,7 @@ template<typename _Fty, typename... Args>
 void EventCallback<_Fty, Args...>::operator()(Args... args) 
 {
     for (auto& callback : m_eventVector) {
-        if (callback) {
+        if (callback && callback!=nullptr) {
             callback(args...); 
         }
     }

@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Graphics/CircleShape.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include "EventCallback.h"
@@ -18,6 +18,7 @@ struct Player
 	Paddle* Character = nullptr;
 	int score = 0;
 	float InputMove = 0.f;
+	std::string Name = "";
 };
 
 class App
@@ -30,8 +31,11 @@ public:
 	static sf::Font* MainFont;
 	
 private:
-	sf::RectangleShape* m_testButton;
-	TextField* m_textField;
+	TextField* m_addressTextField;
+	TextField* m_nameTextField;
+	Button* m_validateButton;
+	sf::Text* m_errorText;
+	
 	UDPClient* m_udpClient;
 	Ball* ball;
 	std::string scoreText = "";
@@ -54,19 +58,22 @@ private:
 	bool m_twoPlayerJoined = false;
 	
 	void HandleServerMessages();
+	void HandleEvents();
 	void Init();
 	void Update();
 	void Draw();
-	void HandleEvents();
 	void JoinGame();
 
-	void HandlePadleMessage(char messageBuffer[]);
-
-	void OnChangeUpAxis();
+	void HandlePaddleMessage(char messageBuffer[]);
+	void HandleNewPlayerMessage(char messageBuffer[]);
 	
+	void OnValidateConnectionFields();
+	void SetErroText(const std::string& text);
+	void EventValidateTextCallback(std::string text);
+	
+	void OnChangeUpAxis();
 	void EventKeyPressedCallback(const sf::Event::KeyPressed* event);
 	void EventKeyReleasedCallback(const sf::Event::KeyReleased* event);
-	void EventValidateTextCallback(std::string text);
 };
 
 
