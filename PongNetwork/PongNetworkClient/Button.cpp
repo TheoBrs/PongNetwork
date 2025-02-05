@@ -33,7 +33,7 @@ void Button::Init(const sf::Vector2f& position, const sf::Vector2f& size)
     setPosition(position);
     m_shape = new sf::RectangleShape(size);
     m_bounds = new sf::Rect<float>(sf::Vector2f(0,0), size);
-    m_shape->setFillColor(sf::Color::Cyan);
+    m_shape->setFillColor(sf::Color::White);
     
     EventHandler::OnMouseButtonPressed += [this](const sf::Event::MouseButtonPressed* event)
     {

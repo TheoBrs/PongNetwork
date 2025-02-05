@@ -17,6 +17,20 @@ struct Player
 
 std::unordered_map<int, Player> players;
 
+
+void SendPadlePositions(SOCKET serverSocket)
+{
+    for (auto playerToSend: players)
+    {
+        for (auto playerInfo: players)
+        {
+            sf::Vector2f pos = playerInfo.second.playerPosition;
+            std::string messagePadle = "Padle " + std::to_string(playerInfo.first) + " " + std::to_string(pos.x) + " " + std::to_string(pos.y);
+            sendto(serverSocket, messagePadle.c_str(), messagePadle.size(), 0, (sockaddr*)&playerToSend.second.addr, sizeof(playerToSend.second.addr));
+        }
+    }
+}
+
 int main()
 {
 #pragma region Initialize Winsock, create socket, and setup server adress and port
@@ -62,66 +76,120 @@ int main()
 
     float ballX = 400, ballY = 400;
     float ballDirectionX = 3.2, ballDirectionY = 2.8;
-
+    int playerID = 0;
+    float paddleX = -1;
+    float paddleY = -1;
+    
     while (true) 
     {
         // Search for messages to receive
         int bytesReceived = recvfrom(serverSocket, buffer, BUFFER_SIZE, 0, (sockaddr*)&clientAddr, &clientAddrSize);
-        if (bytesReceived > 0) 
+        if (bytesReceived <= 0)
         {
-            buffer[bytesReceived] = '\0';
-
-            int playerID = -1;
-            float paddleX = -1;
-            float paddleY = -1;
-
-            sscanf_s(buffer, "%d %f", &playerID, &paddleX);
-
-            // Add player if he's not already connected and there's less than 2 players, 
-            // or else update its position
-            if (playerID == 0 && players.size() <= 2)
+            wprintf(L"recvfrom failed with error %d\n", WSAGetLastError());
+            continue;
+        }
+        buffer[bytesReceived] = '\0';
+        std::string messageReceive(buffer);
+        auto packetType = messageReceive.substr(0, messageReceive.find(' '));
+        
+#pragma region Connection Request
+        if (packetType == "ConnectionRequest")
+        {
+            std::cout << "Demande de connexion" << std::endl;
+            if (players.size() < 2)
             {
-                playerID = players.size() + 1;
-                
-                std::cout << "Joueur " << playerID << " connecte !" << std::endl;
-
-                if (playerID == 1)
+                if (playerID == 0)
                 {
                     paddleX = 100;
                     paddleY = 350;
-                }
-                else if (playerID == 2)
+                }else if (playerID == 1)
                 {
-                    paddleX = 700;
+                    paddleX = 1820;
                     paddleY = 350;
                 }
-
-                // Add player to the unordered_map
-                players[playerID] = { clientAddr, sf::Vector2f(paddleX, paddleY)};
-
-                // Send the player its ID and position, and the position and speed of the ball
-                std::string message = std::to_string(playerID) + " " + std::to_string(paddleX) + " " + std::to_string(paddleY) +
-                    " " + std::to_string(ballX) + " " + std::to_string(ballY) + " " + std::to_string(ballDirectionX) + " " + std::to_string(ballDirectionY);
-
-                sendto(serverSocket, message.c_str(), message.size(), 0, (sockaddr*)&players[playerID].addr, sizeof(players[playerID].addr));
+                players[playerID] = {clientAddr, sf::Vector2f(paddleX, paddleY)};
+                std::string messageToSend("ConnectionResponse 0");
+                messageToSend += " " + std::to_string(playerID);
+                sendto(serverSocket, messageToSend.c_str(), messageToSend.size(), 0, (sockaddr*)&players[playerID].addr, sizeof(players[playerID].addr));
+                
+                SendPadlePositions(serverSocket);
+                playerID++;
             }
-            else 
+            else
             {
-                players[playerID].playerPosition.x = paddleX;
-                players[playerID].playerPosition.y = paddleY;
+                std::string messageToSend("ConnectionResponse 1");
+                sendto(serverSocket, messageToSend.c_str(), messageToSend.size(), 0, (sockaddr*)&clientAddr, sizeof(clientAddr));
             }
 
-
-
-            // Send updates to every players
-            for (auto& [id, player] : players) 
-            {
-                std::string message = std::to_string(playerID) + " " + std::to_string(paddleX) + " " + std::to_string(paddleY) +
-                    " " + std::to_string(ballX) + " " + std::to_string(ballY) + " " + std::to_string(ballDirectionX) + " " + std::to_string(ballDirectionY);
-
-                sendto(serverSocket, message.c_str(), message.size(), 0, (sockaddr*)&player.addr, sizeof(player.addr));
-            }
         }
+#pragma endregion
+
+#pragma region InputMove
+        if (packetType == "InputMove")
+        {
+            char type[50];
+            int clientId;
+            int upAxis;
+            sscanf_s(buffer, "%s %d %d", &type, (unsigned)_countof(type), &clientId, &upAxis);
+            players[clientId].playerPosition.y += upAxis;
+            SendPadlePositions(serverSocket);
+        }
+#pragma endregion 
+        
+#pragma region Old Code
+        // int playerID = -1;
+        // float paddleX = -1;
+        // float paddleY = -1;
+        //
+        // sscanf_s(buffer, "%d %f", &playerID, &paddleX);
+        //
+        // // Add player if he's not already connected and there's less than 2 players, 
+        // // or else update its position
+        // if (playerID == 0 && players.size() <= 2)
+        // {
+        //     playerID = players.size() + 1;
+        //     
+        //     std::cout << "Joueur " << playerID << " connecte !" << std::endl;
+        //
+        //     if (playerID == 1)
+        //     {
+        //         paddleX = 100;
+        //         paddleY = 350;
+        //     }
+        //     else if (playerID == 2)
+        //     {
+        //         paddleX = 700;
+        //         paddleY = 350;
+        //     }
+        //
+        //     // Add player to the unordered_map
+        //     players[playerID] = { clientAddr, sf::Vector2f(paddleX, paddleY)};
+        //
+        //     // Send the player its ID and position, and the position and speed of the ball
+        //     std::string message = std::to_string(playerID) + " " + std::to_string(paddleX) + " " + std::to_string(paddleY) +
+        //         " " + std::to_string(ballX) + " " + std::to_string(ballY) + " " + std::to_string(ballDirectionX) + " " + std::to_string(ballDirectionY);
+        //
+        //     sendto(serverSocket, message.c_str(), message.size(), 0, (sockaddr*)&players[playerID].addr, sizeof(players[playerID].addr));
+        // }
+        // else 
+        // {
+        //     players[playerID].playerPosition.x = paddleX;
+        //     players[playerID].playerPosition.y = paddleY;
+        // }
+        //
+        //
+        //
+        // // Send updates to every players
+        // for (auto& [id, player] : players) 
+        // {
+        //     std::string message = std::to_string(playerID) + " " + std::to_string(paddleX) + " " + std::to_string(paddleY) +
+        //         " " + std::to_string(ballX) + " " + std::to_string(ballY) + " " + std::to_string(ballDirectionX) + " " + std::to_string(ballDirectionY);
+        //
+        //     sendto(serverSocket, message.c_str(), message.size(), 0, (sockaddr*)&player.addr, sizeof(player.addr));
+        // }
+#pragma endregion 
+        
     }
 
 #pragma endregion
