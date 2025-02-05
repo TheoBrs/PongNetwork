@@ -23,6 +23,11 @@ void Paddle::Draw(sf::RenderWindow* window)
     window->draw(shape);
 }
 
+void Paddle::SetPosition(sf::Vector2f newPosition)
+{
+    shape.setPosition(newPosition);
+}
+
 sf::RectangleShape Paddle::GetShape() const 
 {
     return shape;

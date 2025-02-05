@@ -36,7 +36,6 @@ void TextField::EndEnterText()
 
 void TextField::EnterText(const sf::Event::TextEntered* input)
 {
-    std::cout << "Text entered\n";
     std::string str = m_textField->getString();
     if (input->unicode == U'\b' &&  str.length() > 0)
     {
@@ -73,7 +72,7 @@ void TextField::OnInit()
         return;
     }
     m_textField = new sf::Text(*m_font);
-   
+    m_textField->setFillColor(sf::Color::Black);
 }
 
 void TextField::draw(sf::RenderTarget& target, sf::RenderStates states) const

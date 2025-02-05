@@ -1,8 +1,14 @@
 #include <iostream>
+#include <sstream>
+#include <string>
+
+
 #include "Button.h"
 #include "App.h"
 #include "EventHandler.h"
 #include "TextField.h"
+#include "UDPClient.h"
+#include "Paddle.h"
 
 using namespace std::placeholders;
 
@@ -13,10 +19,12 @@ void App::Run()
 	Init();
 	while (Window->isOpen())
 	{
+		HandleServerMessages();
 		HandleEvents();
 		Update();
 		Draw();
 	}
+	m_udpClient->UnInit();
 }
 
 sf::Vector2u App::GetWindowSize()
@@ -24,17 +32,51 @@ sf::Vector2u App::GetWindowSize()
 	return Window->getSize();
 }
 
+void App::HandleServerMessages()
+{
+	char buffer[BUFFER_SIZE];
+	int result = m_udpClient->ReceiveMessage(buffer);
+	if (result == SOCKET_ERROR)
+	{
+		//wprintf(L"recvfrom failed with error %d\n", WSAGetLastError());
+		return;
+	}
+	std::string meesage(buffer);
+	auto messageType = meesage.substr(0, meesage.find(' '));
+
+	if (messageType == "ConnectionResponse")
+	{
+		char type[50];
+		int responseValue;
+		int clientId;
+		sscanf_s(buffer, "%s %d %d", &type, (unsigned)_countof(type), &responseValue, &clientId);
+		if (responseValue == 0)
+		{
+			// If we connect to server
+			m_clientId = clientId;
+			m_isServerJoined = true;
+			JoinGame();
+		}
+
+	}
+	else if (messageType == "Padle")
+	{
+		HandlePadleMessage(buffer);
+	}
+}
+
 void App::Init()
 {
-	Window = new sf::RenderWindow(sf::VideoMode({ 1920, 1080 }), "SFML works!");
-	m_baseShape = new sf::CircleShape(100.f);
-	m_baseShape->setFillColor(sf::Color::Green);
-
-	m_textField = new TextField();
-	m_textField->Init(sf::Vector2f(500,500), sf::Vector2f(100,50));
-	m_textField->OnClickEvent += [this](){TestOnButtonClick();};
 	
-	auto id3 = EventHandler::OnKeyPressed += [this](const sf::Event::KeyPressed* event) {TestHandleInput(event);};
+	m_udpClient = new UDPClient();
+	m_udpClient->Init();
+	Window = new sf::RenderWindow(sf::VideoMode({ 1920, 1080 }), "SFML works!");
+	Window->setFramerateLimit(60);
+	m_textField = new TextField();
+	m_textField->Init(sf::Vector2f(760,245), sf::Vector2f(400,100));
+	m_eventValidateTextId = m_textField->OnValidateText += [this](std::string text)
+	{EventValidateTextCallback(text);};
+	
 }
 
 void App::Update()
@@ -44,27 +86,92 @@ void App::Update()
 void App::Draw()
 {
 	Window->clear();
-	Window->draw(*m_baseShape);
-	Window->draw(*m_textField);
+	if (!m_isServerJoined)
+	{
+		Window->draw(*m_textField);
+	}
+	else
+	{
+		for (auto player: m_players)
+		{
+			player.Character->Draw(Window);
+		}
+	}
 	Window->display();
 }
 
 void App::HandleEvents()
 {
 	EventHandler::HandleEvent(Window);
-	// while (const std::optional event = m_window->pollEvent())
-	// {
-	// 	if (event->is<sf::Event::Closed>())
-	// 		m_window->close();
-	// }
 }
 
-void App::TestOnButtonClick()
+void App::JoinGame()
 {
-	std::cout << "OnClickButton\n";
+	m_eventplayerInputId = EventHandler::OnKeyPressed += [this](const sf::Event::KeyPressed* event)
+	{EventKeyPressedCallback(event);};
+	m_textField->OnValidateText -= m_eventValidateTextId;
+
+	
 }
 
-void App::TestHandleInput(const sf::Event::KeyPressed* event)
+void App::HandlePadleMessage(char messageBuffer[])
 {
-	std::cout << "Key pressed !\n";
+	char type[50];
+	int clientId;
+	float posX, posY;
+	sscanf_s(messageBuffer, "%s %d %f %f", &type, (unsigned)_countof(type), &clientId, &posX, &posY);
+	
+	bool isPLayerInstanciated = false;
+	for (auto player: m_players)
+	{
+		if (player.ClientId == clientId)
+		{
+			isPLayerInstanciated = true;
+			player.Character->SetPosition(sf::Vector2f(posX, posY));
+		}
+	}
+
+	if (!isPLayerInstanciated)
+	{
+		Player newPlayer = Player();
+		newPlayer.ClientId = clientId;
+		newPlayer.Character =
+			new Paddle(posX, posY, 20, 80, 500, sf::Vector2f(Window->getSize()));
+		m_players.push_back(newPlayer);
+	}
+		
 }
+
+void App::EventKeyPressedCallback(const sf::Event::KeyPressed* event)
+{
+	int upAxis = 0;
+	int speed = 10;
+	if (event->scancode == sf::Keyboard::Scancode::Up)
+	{
+		upAxis-= 1 * speed;
+	}
+	if (event->scancode == sf::Keyboard::Scancode::Down)
+	{
+		upAxis+= 1 * speed;
+	}
+	if (upAxis == 0)
+	{
+		return;
+	}
+	std::string messageToSend;
+	messageToSend += "InputMove " + std::to_string(m_clientId) + " " + std::to_string(upAxis);
+	m_udpClient->SendMessageUDP(messageToSend);
+}
+
+void App::EventValidateTextCallback(std::string text)
+{
+	std::stringstream ss(text);
+	std::string ip;
+	int port;
+	std::getline(ss, ip, ':');
+	ss >> port;
+	std::cout << "IP: " << ip << std::endl;
+	std::cout << "Port: " << port << std::endl;
+	m_udpClient->TryConnect(ip, port);
+}
+

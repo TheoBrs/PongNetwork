@@ -8,8 +8,8 @@ private:
     
 public:
     int Init() override;
-    void SendMessage(std::string message) override;
-    unsigned long long ReceiveMessage() override;
+    void SendMessageUDP(std::string message) override;
+    int ReceiveMessage(char (&buffer)[BUFFER_SIZE]) override;
     int TryConnect(const std::string& ip, unsigned int port);
 
 };
