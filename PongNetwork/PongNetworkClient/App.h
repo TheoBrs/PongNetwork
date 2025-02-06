@@ -56,6 +56,7 @@ private:
 	int m_clientId = -1;
 	float m_inputMove = 0.0f;
 	int m_eventValidateTextId = -1;
+	int m_eventValidateButtonId = -1;
 	int m_eventPlayerInputPressedId = -1;
 	int m_eventPlayerInputReleasedId = -1;
 

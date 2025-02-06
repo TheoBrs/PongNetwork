@@ -161,7 +161,7 @@ void App::Init()
 
 	m_validateButton = new Button();
 	m_validateButton->Init(sf::Vector2f(625,345), sf::Vector2f(350,75), "Validate");
-	m_validateButton->OnClickEvent += [this](){OnValidateConnectionFields();};
+	m_eventValidateButtonId = m_validateButton->OnClickEvent += [this](){OnValidateConnectionFields();};
 
 	m_errorText = new sf::Text(*MainFont, "Error Text");
 	m_errorText->setOrigin(sf::Vector2f(0.5f, 0.5f));
@@ -376,7 +376,7 @@ void App::OnValidateConnectionFields()
 	ss >> port;
 	m_udpClient->TryConnect(ip, port, name);
 
-	m_validateButton->setPosition(sf::Vector2f(5000, 5000));
+	m_validateButton->OnClickEvent -= m_eventValidateButtonId;
 }
 
 void App::EventKeyPressedCallback(const sf::Event::KeyPressed* event)
