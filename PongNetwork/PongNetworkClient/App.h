@@ -40,7 +40,6 @@ private:
 	TextField* m_nameTextField;
 
 	Button* m_validateButton;
-
 	
 	UDPClient* m_udpClient;
 	Ball* m_ball;

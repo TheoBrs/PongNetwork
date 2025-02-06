@@ -126,7 +126,7 @@ void App::HandleServerMessages()
 		// Set the disconnected player on "isConnected = false" and set twoPlayerJoined to false
 		m_twoPlayerJoined = false;
 		m_players[disconnectedPlayerID]->isConnected = false;
-		m_players[disconnectedPlayerID]->Character->SetPosition(sf::Vector2f(1000, 1000));
+		m_players[disconnectedPlayerID]->Character->SetPosition(sf::Vector2f(6000, 6000));
 		m_userInterface->SetPlayerConnection(disconnectedPlayerID, false);
 	}
 }
@@ -375,6 +375,8 @@ void App::OnValidateConnectionFields()
 	std::getline(ss, ip, ':');
 	ss >> port;
 	m_udpClient->TryConnect(ip, port, name);
+
+	m_validateButton->setPosition(sf::Vector2f(5000, 5000));
 }
 
 void App::EventKeyPressedCallback(const sf::Event::KeyPressed* event)
