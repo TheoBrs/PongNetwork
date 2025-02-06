@@ -58,3 +58,8 @@ sf::Vector2f Pong::Paddle::GetPosition() const
 {
     return m_shape->getPosition();
 }
+
+float Pong::Paddle::GetDirection() const
+{
+    return m_directionY;
+}

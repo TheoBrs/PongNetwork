@@ -24,7 +24,7 @@ namespace Pong
 
 	protected:
 		// Hérité via Drawable
-		void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 	public:
 		void Init(const GameSettings& settings);
@@ -35,9 +35,11 @@ namespace Pong
 		int GetScore(bool isLeft);
 
 		void SetIsGameRunning(bool isGameRunning);
+		bool GetIsGameRunning();
 
 		Ball* GetBall();
 		Paddle* GetPaddle(bool isLeft);
+
 
 		// The boolean is to here to know who's gain point
 		Utils::EventCallback<void, bool> OnAddScore;

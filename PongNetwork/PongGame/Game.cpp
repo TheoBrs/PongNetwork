@@ -68,6 +68,11 @@ void Pong::Game::SetIsGameRunning(bool isGameRunning)
 	m_isGameRunning = isGameRunning;
 }
 
+bool Pong::Game::GetIsGameRunning()
+{
+	return m_isGameRunning;
+}
+
 Pong::Ball* Pong::Game::GetBall()
 {
 	return m_ball;

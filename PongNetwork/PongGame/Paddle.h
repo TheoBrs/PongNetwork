@@ -33,6 +33,7 @@ namespace Pong
 
 		sf::RectangleShape* GetShape() const;
 		sf::Vector2f GetPosition() const;
+		float GetDirection() const;
 	};
 
 }
