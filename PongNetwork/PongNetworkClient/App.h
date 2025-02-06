@@ -19,6 +19,7 @@ struct Player
 	int score = 0;
 	float InputMove = 0.f;
 	std::string Name = "";
+	bool isConnected = false;
 };
 
 class App
@@ -37,7 +38,7 @@ private:
 	sf::Text* m_errorText;
 	
 	UDPClient* m_udpClient;
-	Ball* ball;
+	Ball* m_ball;
 	std::string scoreText = "";
 	UserInterface* m_userInterface;
 	

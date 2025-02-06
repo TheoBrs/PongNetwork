@@ -14,6 +14,7 @@ using namespace std::placeholders;
 
 sf::RenderWindow* App::Window;
 sf::Font* App::MainFont = nullptr;
+auto m_pingClock = std::chrono::system_clock::now();
 
 void App::Run()
 {
@@ -74,7 +75,7 @@ void App::HandleServerMessages()
 		float ballDirectionX, ballDirectionY;
 		sscanf_s(buffer, "%s %f %f %f %f", &type, (unsigned)_countof(type), &ballX, &ballY, &ballDirectionX, &ballDirectionY);
 
-		ball = new Ball(ballX, ballY, 10, sf::Vector2f(ballDirectionX, ballDirectionY), sf::Vector2f(GetWindowSize()));
+		m_ball = new Ball(ballX, ballY, 10, sf::Vector2f(ballDirectionX, ballDirectionY), sf::Vector2f(GetWindowSize()));
 	}
 	else if (messageType == "Score")
 	{
@@ -102,11 +103,30 @@ void App::HandleServerMessages()
 		float ballDirectionX, ballDirectionY;
 		sscanf_s(buffer, "%s %f %f %f %f", &type, (unsigned)_countof(type), &ballX, &ballY, &ballDirectionX, &ballDirectionY);
 
-		ball = new Ball(ballX, ballY, 10, sf::Vector2f(ballDirectionX, ballDirectionY), sf::Vector2f(GetWindowSize()));
+		m_ball = new Ball(ballX, ballY, 10, sf::Vector2f(ballDirectionX, ballDirectionY), sf::Vector2f(GetWindowSize()));
 	}
 	else if (messageType == "NewPlayer")
 	{
 		HandleNewPlayerMessage(buffer);
+	}
+	else if (messageType == "LastChancePing")
+	{
+		// Send a ping to the server with its client ID
+		std::string messageToSend = "Ping";
+		messageToSend += " " + std::to_string(m_clientId);
+		m_udpClient->SendMessageUDP(messageToSend);
+	}
+	else if (messageType == "PlayerDisconnected")
+	{
+		std::cout << "Disconnection message received" << std::endl;
+		char type[50];
+		int disconnectedPlayerID;
+		sscanf_s(buffer, "%s %d", &type, (unsigned)_countof(type), &disconnectedPlayerID);
+
+		// Set the disconnected player on "isConnected = false" and set twoPlayerJoined to false
+		m_twoPlayerJoined = false;
+		m_players[disconnectedPlayerID]->isConnected = false;
+		m_players[disconnectedPlayerID]->Character->SetPosition(sf::Vector2f(1000, 1000));
 	}
 }
 
@@ -155,17 +175,20 @@ void App::Update()
 {
 	for (auto player: m_players)
 	{
-		player->Character->Move(player->InputMove);
+		if (player->isConnected)
+		{
+			player->Character->Move(player->InputMove);
+		}
 	}
 	if (m_twoPlayerJoined)
 	{
-		ball->Move();
+		m_ball->Move();
 		for (auto player : m_players)
 		{
-			ball->OnPaddleCollision(player->Character);
+			m_ball->OnPaddleCollision(player->Character);
 		}
 		
-		if (ball->GetPosition().x - (ball->GetShape().getRadius() * 2) <= 0)
+		if (m_ball->GetPosition().x - (m_ball->GetShape().getRadius() * 2) <= 0)
 		{
 			playerWhoScored = 1;
 
@@ -175,13 +198,29 @@ void App::Update()
 			m_udpClient->SendMessageUDP(messageToSend);
 		}
 
-		if (ball->GetPosition().x >= GetWindowSize().x)
+		if (m_ball->GetPosition().x >= GetWindowSize().x)
 		{
 			playerWhoScored = 0;
 
 			// Send which player scored to the server
 			std::string messageToSend = "Score";
 			messageToSend += " " + std::to_string(playerWhoScored);
+			m_udpClient->SendMessageUDP(messageToSend);
+		}
+	}
+
+	if (m_isServerJoined)
+	{
+		// Send a message every 2 seconds to tell the server player is still connected
+		if (std::chrono::system_clock::now() - m_pingClock > std::chrono::seconds(2))
+		{
+			std::cout << "Ping sent." << std::endl;
+
+			m_pingClock = std::chrono::system_clock::now();
+
+			// Send a ping to the server with its client ID
+			std::string messageToSend = "Ping";
+			messageToSend += " " + std::to_string(m_clientId);
 			m_udpClient->SendMessageUDP(messageToSend);
 		}
 	}
@@ -201,12 +240,15 @@ void App::Draw()
 	{
 		for (auto player: m_players)
 		{
-			player->Character->Draw(Window);
+			if (player->isConnected)
+			{
+				player->Character->Draw(Window);
+			}
 		}
 
 		if (m_twoPlayerJoined)
 		{
-			ball->Draw(Window);
+			m_ball->Draw(Window);
 		}
 		Window->draw(*m_userInterface);
 
@@ -227,8 +269,6 @@ void App::JoinGame()
 	m_eventPlayerInputReleasedId = EventHandler::OnKeyReleased += [this](const sf::Event::KeyReleased* event)
 	{EventKeyReleasedCallback(event);};
 	m_addressTextField->OnValidateText -= m_eventValidateTextId;
-
-	
 }
 
 void App::HandlePaddleMessage(char messageBuffer[])
@@ -268,7 +308,7 @@ void App::HandleNewPlayerMessage(char messageBuffer[])
 		&upAxis,
 		&name, (unsigned)_countof(name));
 
-	std::cout << "[New Plauyer] Client: " << clientId
+	std::cout << "[New Player] Client: " << clientId
 	<< ", Position: (" << posX << ", " << posY << ")"
 	<< ", UpAxis: " << upAxis 
 	<< ", Name: " << name << std::endl ;
@@ -278,6 +318,8 @@ void App::HandleNewPlayerMessage(char messageBuffer[])
 	newPlayer->Character =
 		new Paddle(posX, posY, 20, 80, 10, sf::Vector2f(Window->getSize()));
 	newPlayer->Name = name;
+	newPlayer->isConnected = true;
+
 	if (clientId == m_clientId)
 	{
 		m_paddle = newPlayer->Character;

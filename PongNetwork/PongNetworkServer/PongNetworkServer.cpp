@@ -17,19 +17,22 @@ struct Player
     float inputMove = 0.0f;
     int score = 0;
     std::string name;
+    bool isConnected = false;
 };
 
-auto m_scoreClock = std::chrono::system_clock::now();
 std::unordered_map<int, Player*> players;
+std::unordered_map<int, std::chrono::time_point<std::chrono::system_clock>> m_playerLastResponse;
+std::chrono::time_point<std::chrono::system_clock> m_scoreClock = std::chrono::system_clock::now();
 
 int playerID = 0;
 int m_maxNumberOfPlayer = 2;
+int m_numberOfConnectedPlayers = 0;
 int scoreClock = 0;
 
 float ballX = 800, ballY = 450;
 float ballDirectionX = 4.3, ballDirectionY = 3.7;
-float paddleX = -1;
-float paddleY = -1;
+float m_firstPlayerX = 100, m_firstPlayerY = 400;
+float m_secondPlayerX = 1500, m_secondPlayerY = 400;
 
 bool m_fullLobbyMessageSent = false;
 
@@ -108,24 +111,52 @@ void Respawn(SOCKET serverSocket)
         if (player.first == 0)
         {
             std::cout << "Player " << player.first << " position reset : 100, 440" << std::endl;
-            player.second->playerPosition.x = 100;
-            player.second->playerPosition.y = 400;
+            player.second->playerPosition.x = m_firstPlayerX;
+            player.second->playerPosition.y = m_firstPlayerY;
         }
         else if (player.first == 1)
         {
             std::cout << "Player " << player.first << " position reset : 1820, 440" << std::endl;
-            player.second->playerPosition.x = 1500;
-            player.second->playerPosition.y = 400;
+            player.second->playerPosition.x = m_secondPlayerX;
+            player.second->playerPosition.y = m_secondPlayerY;
         }
     }
-
-    // Reset ball position
-    ballX = 800, ballY = 450;
 
     // Send every new informations to every players
     SendBallPosition(serverSocket);
     SendPaddlesPositions(serverSocket);
     SendScore(serverSocket);
+}
+
+void PlayerDisconnected(SOCKET serverSocket, int disconnectedPlayerID)
+{
+    m_fullLobbyMessageSent = false;
+
+    // Send a message to every player still connected to stop the game and erase the disconnected player
+    for (auto player : players)
+    {
+        player.second->score = 0;
+
+        if (player.second->isConnected)
+        {
+            if (player.first == 0)
+            {
+                player.second->playerPosition.x = m_firstPlayerX;
+                player.second->playerPosition.y = m_firstPlayerY;
+            }
+            else if (player.first == 1)
+            {
+                player.second->playerPosition.x = m_secondPlayerX;
+                player.second->playerPosition.y = m_secondPlayerY;
+            }
+
+            SendPaddlesPositions(serverSocket);
+            SendScore(serverSocket);
+
+            std::string messagePadle = "PlayerDisconnected " + std::to_string(disconnectedPlayerID);
+            sendto(serverSocket, messagePadle.c_str(), messagePadle.size(), 0, (sockaddr*)&player.second->addr, sizeof(player.second->addr));
+        }
+    }
 }
 
 int main()
@@ -194,25 +225,29 @@ int main()
                 char name[100];
                 sscanf_s(buffer, "%s %s", &type, (unsigned)_countof(type), &name,  (unsigned)_countof(name));
 
-                
+                float paddleX, paddleY;
+
                 if (playerID == 0)
                 {
-                    paddleX = 100;
-                    paddleY = 400;
+                    paddleX = m_firstPlayerX;
+                    paddleY = m_firstPlayerY;
                 }
                 else if (playerID == 1)
                 {
-                    paddleX = 1500;
-                    paddleY = 400;
+                    paddleX = m_secondPlayerX;
+                    paddleY = m_secondPlayerY;
                 }
                 players[playerID] =
-                    new Player{clientAddr, sf::Vector2f(paddleX, paddleY), 0,0,name};
+                    new Player{clientAddr, sf::Vector2f(paddleX, paddleY), 0, 0, name, true};
+
+                m_playerLastResponse[playerID] = std::chrono::system_clock::now();
+
                 std::string messageToSend("ConnectionResponse 0");
                 messageToSend += " " + std::to_string(playerID);
                 sendto(serverSocket, messageToSend.c_str(), messageToSend.size(), 0, (sockaddr*)&players[playerID]->addr, sizeof(players[playerID]->addr));
                 SendNewPlayer(serverSocket);
-                //SendPaddlesPositions(serverSocket);
                 playerID++;
+                m_numberOfConnectedPlayers++;
             }
             else
             {
@@ -224,7 +259,7 @@ int main()
 
 #pragma region Player scored
 
-        if (packetType == "Score" && std::chrono::system_clock::now() - m_scoreClock > std::chrono::seconds(1))
+        if (packetType == "Score" && std::chrono::system_clock::now() - m_scoreClock > std::chrono::seconds(1) && m_fullLobbyMessageSent)
         {
             m_scoreClock = std::chrono::system_clock::now();
 
@@ -245,7 +280,8 @@ int main()
 
 #pragma region LobbyFull message and ball initialization
 
-        if (players.size() == m_maxNumberOfPlayer && !m_fullLobbyMessageSent)
+
+        if (players.size() == m_maxNumberOfPlayer && !m_fullLobbyMessageSent && m_numberOfConnectedPlayers == m_maxNumberOfPlayer)
         {
             m_fullLobbyMessageSent = true;
 
@@ -255,6 +291,43 @@ int main()
                 messageToSend += " " + std::to_string(ballX) + " " + std::to_string(ballY) +
                     " " + std::to_string(ballDirectionX) + " " + std::to_string(ballDirectionY);
                 sendto(serverSocket, messageToSend.c_str(), messageToSend.size(), 0, (sockaddr*)&playerToSend.second->addr, sizeof(playerToSend.second->addr));
+            }
+        }
+
+#pragma endregion
+
+#pragma region Player connection ping
+
+        if (packetType == "Ping")
+        {
+            char type[50];
+            int playerID;
+            sscanf_s(buffer, "%s %d", &type, (unsigned)_countof(type), &playerID);
+
+            // Reset inactivity clock for this player
+            m_playerLastResponse[playerID] = std::chrono::system_clock::now();
+        }
+
+        for (auto player : players)
+        {
+            if (player.second->isConnected)
+            {
+                // If a client didn't ping the server for 7 seconds, disconnect it
+                if (std::chrono::system_clock::now() - m_playerLastResponse[player.first] > std::chrono::seconds(7))
+                {
+                    std::cout << "Joueur " << player.first << " est deconnecte !" << std::endl;
+                    player.second->isConnected = false;
+                    m_numberOfConnectedPlayers--;
+                    PlayerDisconnected(serverSocket, player.first);
+                }
+                // If a client didn't ping the server for 5 seconds, send a last chance ping to the client
+                else if (std::chrono::system_clock::now() - m_playerLastResponse[player.first] > std::chrono::seconds(5))
+                {
+                    std::cout << "LactChancePing sent." << std::endl;
+
+                    std::string messageToSend("LastChancePing");
+                    sendto(serverSocket, messageToSend.c_str(), messageToSend.size(), 0, (sockaddr*)&player.second->addr, sizeof(player.second->addr));
+                }
             }
         }
 
@@ -274,7 +347,6 @@ int main()
             SendPaddleWithId(serverSocket, clientId);
         }
 #pragma endregion 
-        
     }
 
 #pragma endregion
