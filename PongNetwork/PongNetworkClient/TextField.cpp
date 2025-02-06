@@ -27,8 +27,6 @@ void TextField::EndEnterText()
     m_isEnteringText = false;
 
     OnValidateText(m_textField->getString());
-    EventHandler::OnTextEntered -= m_callbackTextEnteredId;
-    EventHandler::OnKeyPressed -= m_callbackInputKeyId;
     m_textField->setString("");
 }
 
