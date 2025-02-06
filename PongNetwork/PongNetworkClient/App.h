@@ -32,10 +32,15 @@ public:
 	static sf::Font* MainFont;
 	
 private:
+	sf::Text* m_errorText;
+	sf::Text* m_adressText;
+	sf::Text* m_nameText;
+
 	TextField* m_addressTextField;
 	TextField* m_nameTextField;
+
 	Button* m_validateButton;
-	sf::Text* m_errorText;
+
 	
 	UDPClient* m_udpClient;
 	Ball* m_ball;

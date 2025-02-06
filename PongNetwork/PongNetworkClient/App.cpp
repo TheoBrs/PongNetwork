@@ -149,9 +149,15 @@ void App::Init()
 	m_addressTextField->Init(sf::Vector2f(625,245), sf::Vector2f(350,75), "");
 	m_eventValidateTextId = m_addressTextField->OnValidateText += [this](std::string text)
 	{EventValidateTextCallback(text);};
+
+	m_adressText = new sf::Text(*MainFont, "IP Adress :");
+	m_adressText->setPosition({ 450, 260 });
 	
 	m_nameTextField = new TextField();
 	m_nameTextField->Init(sf::Vector2f(625,145), sf::Vector2f(350,75), "");
+
+	m_nameText = new sf::Text(*MainFont, "Name :");
+	m_nameText->setPosition({ 500, 160 });
 
 	m_validateButton = new Button();
 	m_validateButton->Init(sf::Vector2f(625,345), sf::Vector2f(350,75), "Validate");
@@ -236,6 +242,8 @@ void App::Draw()
 		Window->draw(*m_nameTextField);
 		Window->draw(*m_validateButton);
 		Window->draw(*m_errorText);
+		Window->draw(*m_adressText);
+		Window->draw(*m_nameText);
 	}
 	else
 	{
