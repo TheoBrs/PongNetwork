@@ -127,6 +127,7 @@ void App::HandleServerMessages()
 		m_twoPlayerJoined = false;
 		m_players[disconnectedPlayerID]->isConnected = false;
 		m_players[disconnectedPlayerID]->Character->SetPosition(sf::Vector2f(1000, 1000));
+		m_userInterface->SetPlayerConnection(disconnectedPlayerID, false);
 	}
 }
 

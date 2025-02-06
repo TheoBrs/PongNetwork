@@ -219,6 +219,8 @@ int main()
         if (packetType == "ConnectionRequest")
         {
             std::cout << "Demande de connexion" << std::endl;
+
+            // If the lobby isn't full, add the player
             if (players.size() < m_maxNumberOfPlayer)
             {
                 char type[50];
@@ -237,8 +239,9 @@ int main()
                     paddleX = m_secondPlayerX;
                     paddleY = m_secondPlayerY;
                 }
+
                 players[playerID] =
-                    new Player{clientAddr, sf::Vector2f(paddleX, paddleY), 0, 0, name, true};
+                    new Player{ clientAddr, sf::Vector2f(paddleX, paddleY), 0, 0, name, true };
 
                 m_playerLastResponse[playerID] = std::chrono::system_clock::now();
 
@@ -247,6 +250,44 @@ int main()
                 sendto(serverSocket, messageToSend.c_str(), messageToSend.size(), 0, (sockaddr*)&players[playerID]->addr, sizeof(players[playerID]->addr));
                 SendNewPlayer(serverSocket);
                 playerID++;
+                m_numberOfConnectedPlayers++;
+            }
+            // If a player disconnected, we give the new client the ID of the player who disconnected
+            else if (m_numberOfConnectedPlayers != m_maxNumberOfPlayer)
+            {
+                char type[50];
+                char name[100];
+                sscanf_s(buffer, "%s %s", &type, (unsigned)_countof(type), &name, (unsigned)_countof(name));
+
+                float paddleX, paddleY;
+
+                for (auto player : players)
+                {
+                    if (!player.second->isConnected)
+                    {
+                        if (player.first == 0)
+                        {
+                            paddleX = m_firstPlayerX;
+                            paddleY = m_firstPlayerY;
+                        }
+                        else if (player.first == 1)
+                        {
+                            paddleX = m_secondPlayerX;
+                            paddleY = m_secondPlayerY;
+                        }
+
+                        players[player.first] =
+                            new Player{ clientAddr, sf::Vector2f(paddleX, paddleY), 0, 0, name, true };
+
+                        m_playerLastResponse[player.first] = std::chrono::system_clock::now();
+
+                        std::string messageToSend("ConnectionResponse 0");
+                        messageToSend += " " + std::to_string(player.first);
+                        sendto(serverSocket, messageToSend.c_str(), messageToSend.size(), 0, (sockaddr*)&players[player.first]->addr, sizeof(players[player.first]->addr));
+                        SendNewPlayer(serverSocket);
+                    }
+                }
+
                 m_numberOfConnectedPlayers++;
             }
             else
