@@ -1,11 +1,25 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35707.178 d17.12
+VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PongNetworkClient", "PongNetworkClient\PongNetworkClient.vcxproj", "{0F8E3C27-04EB-4C19-93A8-67E8FD7838DF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DDF06314-8978-4D81-8031-CA259166E478} = {DDF06314-8978-4D81-8031-CA259166E478}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PongNetworkServer", "PongNetworkServer\PongNetworkServer.vcxproj", "{84442AA5-944B-4D0B-BEC0-006800872AE6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C7226F92-0B04-4555-8673-1654C9CD61BF} = {C7226F92-0B04-4555-8673-1654C9CD61BF}
+		{DDF06314-8978-4D81-8031-CA259166E478} = {DDF06314-8978-4D81-8031-CA259166E478}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PongGame", "PongGame\PongGame.vcxproj", "{C7226F92-0B04-4555-8673-1654C9CD61BF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DDF06314-8978-4D81-8031-CA259166E478} = {DDF06314-8978-4D81-8031-CA259166E478}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Utils", "Utils\Utils.vcxproj", "{DDF06314-8978-4D81-8031-CA259166E478}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +45,22 @@ Global
 		{84442AA5-944B-4D0B-BEC0-006800872AE6}.Release|x64.Build.0 = Release|x64
 		{84442AA5-944B-4D0B-BEC0-006800872AE6}.Release|x86.ActiveCfg = Release|Win32
 		{84442AA5-944B-4D0B-BEC0-006800872AE6}.Release|x86.Build.0 = Release|Win32
+		{C7226F92-0B04-4555-8673-1654C9CD61BF}.Debug|x64.ActiveCfg = Debug|x64
+		{C7226F92-0B04-4555-8673-1654C9CD61BF}.Debug|x64.Build.0 = Debug|x64
+		{C7226F92-0B04-4555-8673-1654C9CD61BF}.Debug|x86.ActiveCfg = Debug|Win32
+		{C7226F92-0B04-4555-8673-1654C9CD61BF}.Debug|x86.Build.0 = Debug|Win32
+		{C7226F92-0B04-4555-8673-1654C9CD61BF}.Release|x64.ActiveCfg = Release|x64
+		{C7226F92-0B04-4555-8673-1654C9CD61BF}.Release|x64.Build.0 = Release|x64
+		{C7226F92-0B04-4555-8673-1654C9CD61BF}.Release|x86.ActiveCfg = Release|Win32
+		{C7226F92-0B04-4555-8673-1654C9CD61BF}.Release|x86.Build.0 = Release|Win32
+		{DDF06314-8978-4D81-8031-CA259166E478}.Debug|x64.ActiveCfg = Debug|x64
+		{DDF06314-8978-4D81-8031-CA259166E478}.Debug|x64.Build.0 = Debug|x64
+		{DDF06314-8978-4D81-8031-CA259166E478}.Debug|x86.ActiveCfg = Debug|Win32
+		{DDF06314-8978-4D81-8031-CA259166E478}.Debug|x86.Build.0 = Debug|Win32
+		{DDF06314-8978-4D81-8031-CA259166E478}.Release|x64.ActiveCfg = Release|x64
+		{DDF06314-8978-4D81-8031-CA259166E478}.Release|x64.Build.0 = Release|x64
+		{DDF06314-8978-4D81-8031-CA259166E478}.Release|x86.ActiveCfg = Release|Win32
+		{DDF06314-8978-4D81-8031-CA259166E478}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

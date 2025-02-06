@@ -1,5 +1,6 @@
 #pragma once
 #include "EventCallback.h"
+
 template<typename  _Fty, typename... Args>
 size_t  EventCallback<_Fty, Args...>::operator+=(const std::function<_Fty(Args...)>& callback)
 {
@@ -25,11 +26,11 @@ void EventCallback<_Fty, Args...>::operator-=(size_t callbackId)
 }
 
 template<typename _Fty, typename... Args>
-void EventCallback<_Fty, Args...>::operator()(Args... args) 
+void EventCallback<_Fty, Args...>::operator()(Args... args)
 {
     for (auto& callback : m_eventVector) {
-        if (callback && callback!=nullptr) {
-            callback(args...); 
+        if (callback && callback != nullptr) {
+            callback(args...);
         }
     }
 }
