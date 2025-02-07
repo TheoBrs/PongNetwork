@@ -19,6 +19,7 @@ struct Player
 	int score = 0;
 	float InputMove = 0.f;
 	std::string Name = "";
+	bool isConnected = false;
 };
 
 class App
@@ -31,13 +32,17 @@ public:
 	static sf::Font* MainFont;
 	
 private:
+	sf::Text* m_errorText;
+	sf::Text* m_adressText;
+	sf::Text* m_nameText;
+
 	TextField* m_addressTextField;
 	TextField* m_nameTextField;
+
 	Button* m_validateButton;
-	sf::Text* m_errorText;
 	
 	UDPClient* m_udpClient;
-	Ball* ball;
+	Ball* m_ball;
 	std::string scoreText = "";
 	UserInterface* m_userInterface;
 	
@@ -51,6 +56,7 @@ private:
 	int m_clientId = -1;
 	float m_inputMove = 0.0f;
 	int m_eventValidateTextId = -1;
+	int m_eventValidateButtonId = -1;
 	int m_eventPlayerInputPressedId = -1;
 	int m_eventPlayerInputReleasedId = -1;
 
