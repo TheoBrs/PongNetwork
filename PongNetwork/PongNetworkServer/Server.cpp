@@ -137,7 +137,7 @@ void Server::HandleConnectionRequest(
 	sscanf_s(bufferC, "%s %s", &type, (unsigned)_countof(type), &name, (unsigned)_countof(name));
 	m_udpServer->AddClient(clientId, address, name);
 
-	bool isLeft = m_players.size() == 0;
+	bool isLeft = clientId == 0;
 	m_players[clientId] = isLeft;
 
 	std::string messageConnectionResponse = "ConnectionResponse 0 " + std::to_string(clientId);
