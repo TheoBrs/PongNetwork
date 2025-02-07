@@ -32,7 +32,8 @@ class Server
 private:
 	UDPServer* m_udpServer;
 	Pong::Game* m_game;
-	std::unordered_map<int, Pong::Paddle*> m_players;
+	std::unordered_map<int, bool> m_players;
+	Pong::GameSettings* m_gameSettings;
 
 	void Update(float deltaTime);
 	void Init();
@@ -54,6 +55,7 @@ private:
 	void SendGameIsRunning();
 
 	void SendGameState();
+	void SendGameSettings(int clientID);
 
 public:
 	void Run();

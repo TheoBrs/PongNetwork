@@ -4,12 +4,11 @@
 #include "TextField.h"
 
 
-#include "App.h"
 #include "EventHandler.h"
 
 void TextField::StartEnterText()
 {
-    if (m_isEnteringText)
+    if (m_isEnteringText || !m_isActive)
     {
         return;
     }
@@ -20,7 +19,7 @@ void TextField::StartEnterText()
 
 void TextField::EndEnterText()
 {
-    if (!m_isEnteringText)
+    if (!m_isEnteringText || !m_isActive)
     {
         return;
     }
@@ -32,7 +31,7 @@ void TextField::EndEnterText()
 
 void TextField::EnterText(const sf::Event::TextEntered* input)
 {
-    if (!m_isEnteringText)
+    if (!m_isEnteringText || !m_isActive)
     {
         return;
     }
@@ -54,7 +53,7 @@ void TextField::EnterText(const sf::Event::TextEntered* input)
 
 void TextField::HandleInputKey(const sf::Event::KeyPressed* event)
 {
-    if (!m_isEnteringText)
+    if (!m_isEnteringText || !m_isActive)
     {
         return;
     }
@@ -80,9 +79,9 @@ void TextField::OnClick()
     StartEnterText();
 }
 
-void TextField::OnInit()
+void TextField::OnInit(sf::Font* font)
 {
-    Button::OnInit();
+    Button::OnInit(font);
     m_callbackOnClickId = EventHandler::OnMouseButtonPressed += [this] (const sf::Event::MouseButtonPressed* event)
     {
         CheckOnClickOutside(event);
@@ -96,7 +95,7 @@ void TextField::OnInit()
     {
         HandleInputKey(event);
     };
-    m_textField = new sf::Text(*App::MainFont);
+    m_textField = new sf::Text(*font);
     m_textField->setFillColor(sf::Color::Black);
     m_textField->setPosition({m_shape->getSize().x/2, m_shape->getSize().y/2});
 
@@ -105,7 +104,7 @@ void TextField::OnInit()
 void TextField::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
     Button::draw(target, states);
-    if (m_textField == nullptr)
+    if (m_textField == nullptr || !m_isActive)
     {
         return;
     }

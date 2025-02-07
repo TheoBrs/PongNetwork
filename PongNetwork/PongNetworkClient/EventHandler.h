@@ -10,6 +10,8 @@ namespace sf
 
 class EventHandler
 {
+private:
+    static sf::RenderWindow* s_window;
 public:
     static Utils::EventCallback<void> OnWindowClose;
     static Utils::EventCallback<void, const sf::Event::KeyPressed*> OnKeyPressed;
@@ -17,6 +19,7 @@ public:
     static Utils::EventCallback<void, const sf::Event::MouseButtonPressed*> OnMouseButtonPressed;
     static Utils::EventCallback<void, const sf::Event::TextEntered*> OnTextEntered;
     
-    static void HandleEvent(sf::RenderWindow* window);
-    static sf::Vector2u GetMousePosition(sf::RenderWindow* window);
+    static void Init(sf::RenderWindow* window);
+    static void HandleEvent();
+    static sf::Vector2f GetMousePosition();
 };

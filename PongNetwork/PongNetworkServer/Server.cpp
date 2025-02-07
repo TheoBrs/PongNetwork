@@ -17,7 +17,8 @@ void Server::Init()
 	m_udpServer->Init();
 
 	m_game = new Pong::Game();
-	Pong::GameSettings settings
+	m_gameSettings = new Pong::GameSettings();
+	*m_gameSettings =
 	{
 		SCREEN_SIZE,
 		BALL_SETTINGS,
@@ -25,7 +26,7 @@ void Server::Init()
 		PADDLE_SETTINGS_RIGHT
 	};
 
-	m_game->Init(settings);
+	m_game->Init(*m_gameSettings);
 	m_game->SetIsGameRunning(false);
 
 	m_game->GetBall()->OnBounce += [this]() {SendBallCurrentState(); };
@@ -35,6 +36,7 @@ void Server::Init()
 			m_game->SetIsGameRunning(false);
 			SendGameState();
 		};
+
 }
 
 PacketType Server::ResolvePacketType(const std::string& input)
@@ -97,15 +99,16 @@ void Server::HandleConnectionRequest(
 	sscanf_s(bufferC, "%s %s", &type, (unsigned)_countof(type), &name, (unsigned)_countof(name));
 	m_udpServer->AddClient(clientId, address, name);
 
-	bool isLeft = m_players.size() > 0;
-	m_players[clientId] = m_game->GetPaddle(isLeft);
+	bool isLeft = m_players.size() == 0;
+	m_players[clientId] = isLeft;
 
 	std::string messageConnectionResponse = "ConnectionResponse 0 " + std::to_string(clientId);
 	m_udpServer->AddMessageUDP(clientId, messageConnectionResponse);
+	SendGameSettings(clientId);
+	std::string nameString = name;
 
-	std::string messageNewPlayer = "NewPlayer " + std::to_string(clientId) + " " + std::to_string(isLeft ? 1 : 0);
+	std::string messageNewPlayer = "NewPlayer " + nameString + " " + std::to_string(isLeft ? 1 : 0);
 	m_udpServer->AddMessageUDPAll(messageConnectionResponse);
-
 	
 }
 
@@ -119,7 +122,8 @@ void Server::HandleInputChange(const std::array<char, BUFFER_SIZE>& buffer)
 	sscanf_s(bufferC, "%s %d %f", &type, (unsigned)_countof(type), &clientId, &upAxis);
 	
 	upAxis = std::clamp<float>(-1.f, 1.f, upAxis);
-	m_players[clientId]->SetDirection(upAxis);
+	Pong::Paddle* paddle = m_game->GetPaddle(m_players[clientId]);
+	paddle->SetDirection(upAxis);
 	SendPaddleCurrentState(clientId);
 }
 
@@ -137,13 +141,15 @@ void Server::SendBallCurrentState()
 
 void Server::SendPaddleCurrentState(int clientId)
 {
-	float upAxis = m_players[clientId]->GetDirection();
+	Pong::Paddle* paddle = m_game->GetPaddle(m_players[clientId]);
+
+	float upAxis = paddle->GetDirection();
 	std::string messageToSend =
 		"Paddle " +
 		std::to_string(clientId) + " " +
 		std::to_string(upAxis) + " " +
-		std::to_string(m_players[clientId]->GetPosition().x) + " " +
-		std::to_string(m_players[clientId]->GetPosition().y) + " "
+		std::to_string(paddle->GetPosition().x) + " " +
+		std::to_string(paddle->GetPosition().y) + " "
 		;
 	m_udpServer->AddMessageUDPAll(messageToSend);
 }
@@ -175,6 +181,41 @@ void Server::SendGameState()
 		SendPaddleCurrentState(clientId);
 	}
 	SendScore();
+}
+
+void Server::SendGameSettings(int clientID)
+{
+	std::string paddleLeftSettings, paddleRightSettings, ballSettings;
+
+	paddleLeftSettings =
+		std::to_string(m_gameSettings->PaddleLeft.BasePosition.x) + " " +
+		std::to_string(m_gameSettings->PaddleLeft.BasePosition.y) + " " +
+		std::to_string(m_gameSettings->PaddleLeft.BasPaddleSpeed) + " " +
+		std::to_string(m_gameSettings->PaddleLeft.Width) + " " +
+		std::to_string(m_gameSettings->PaddleLeft.Height);
+
+	paddleRightSettings =
+		std::to_string(m_gameSettings->PaddleRight.BasePosition.x) + " " +
+		std::to_string(m_gameSettings->PaddleRight.BasePosition.y) + " " +
+		std::to_string(m_gameSettings->PaddleRight.BasPaddleSpeed) + " " +
+		std::to_string(m_gameSettings->PaddleRight.Width) + " " +
+		std::to_string(m_gameSettings->PaddleRight.Height);
+
+	ballSettings =
+		std::to_string(m_gameSettings->Ball.BasePosition.x) + " " +
+		std::to_string(m_gameSettings->Ball.BasePosition.y) + " " +
+		std::to_string(m_gameSettings->Ball.BaseBallSpeed) + " " +
+		std::to_string(m_gameSettings->Ball.Radius);
+
+	std::string messageToSend =
+		"GameSettings " +
+		std::to_string(m_gameSettings->ScreeSize.x) + " " +
+		std::to_string(m_gameSettings->ScreeSize.y) + " " +
+		paddleLeftSettings + " " +
+		paddleRightSettings + " " +
+		ballSettings;
+	
+	m_udpServer->AddMessageUDP(clientID, messageToSend);
 }
 
 

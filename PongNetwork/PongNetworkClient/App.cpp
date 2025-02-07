@@ -125,15 +125,15 @@ void App::Init()
 	Window->setFramerateLimit(60);
 	
 	m_addressTextField = new TextField();
-	m_addressTextField->Init(sf::Vector2f(625,245), sf::Vector2f(350,75), "");
+	m_addressTextField->Init(sf::Vector2f(625,245), sf::Vector2f(350,75), "", MainFont);
 	m_eventValidateTextId = m_addressTextField->OnValidateText += [this](std::string text)
 	{EventValidateTextCallback(text);};
 	
 	m_nameTextField = new TextField();
-	m_nameTextField->Init(sf::Vector2f(625,145), sf::Vector2f(350,75), "");
+	m_nameTextField->Init(sf::Vector2f(625,145), sf::Vector2f(350,75), "", MainFont);
 
 	m_validateButton = new Button();
-	m_validateButton->Init(sf::Vector2f(625,345), sf::Vector2f(350,75), "Validate");
+	m_validateButton->Init(sf::Vector2f(625,345), sf::Vector2f(350,75), "Validate", MainFont);
 	m_validateButton->OnClickEvent += [this](){OnValidateConnectionFields();};
 
 	m_errorText = new sf::Text(*MainFont, "Error Text");
@@ -217,7 +217,7 @@ void App::Draw()
 
 void App::HandleEvents()
 {
-	EventHandler::HandleEvent(Window);
+	EventHandler::HandleEvent();
 }
 
 void App::JoinGame()

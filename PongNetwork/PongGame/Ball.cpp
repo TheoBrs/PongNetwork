@@ -19,8 +19,7 @@ Pong::Ball::Ball(const BallSettings& settings, sf::Vector2f direction, sf::Vecto
 	this->m_direction = direction;
 	this->m_screenSize = screenSize;
 	this->m_speed = settings.BaseBallSpeed;
-
-	m_shape->setRadius(settings.Radius);
+	m_shape = new sf::CircleShape(settings.Radius);
 	m_shape->setFillColor(sf::Color::White);
 	m_shape->setPosition(settings.BasePosition);
 }

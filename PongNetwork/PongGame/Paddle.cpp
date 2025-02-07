@@ -10,8 +10,7 @@ Pong::Paddle::Paddle(const PaddleSettings& settings, sf::Vector2f screenSize)
 {
     this->m_screenSize = screenSize;
     this->m_speed = settings.BasPaddleSpeed;
-
-    m_shape->setSize(sf::Vector2f(settings.Width, settings.Height));
+    m_shape = new sf::RectangleShape(sf::Vector2f(settings.Width, settings.Height));
     m_shape->setFillColor(sf::Color::White);
     m_shape->setPosition(settings.BasePosition);
 
