@@ -1,6 +1,5 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 #include "UserInterface.h"
-#include "App.h"
 
 void UserInterface::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {

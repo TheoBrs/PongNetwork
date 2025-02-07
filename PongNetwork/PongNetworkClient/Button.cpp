@@ -1,7 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include "EventHandler.h"
 #include "Button.h"
-#include "App.h"
 void Button::CheckClick(const sf::Event::MouseButtonPressed* event)
 {
     if (event == nullptr || event->button != sf::Mouse::Button::Left || !m_isActive)

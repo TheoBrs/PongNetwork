@@ -32,7 +32,7 @@ void Pong::Paddle::Move(float deltaTime)
     sf::Vector2f startPosition = m_shape->getPosition();
     m_shape->move({ 0, m_directionY * m_speed * deltaTime});
 
-    if (m_shape->getPosition().y < 0 && m_shape->getPosition().y + m_shape->getSize().y > m_screenSize.y)
+    if (m_shape->getPosition().y < 0 || m_shape->getPosition().y + m_shape->getSize().y > m_screenSize.y)
     {
         m_shape->setPosition(startPosition);
     }

@@ -138,8 +138,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="App.cpp" />
-    <ClCompile Include="Ball.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="AEntity.cpp" />
     <ClCompile Include="Client.cpp" />
@@ -147,21 +145,17 @@
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="PLayerController.cpp" />
     <ClCompile Include="PongNetworkClient.cpp" />
-    <ClCompile Include="Paddle.cpp" />
     <ClCompile Include="TextField.cpp" />
     <ClCompile Include="UDPClient.cpp" />
     <ClCompile Include="UDPService.cpp" />
     <ClCompile Include="UserInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="App.h" />
-    <ClInclude Include="Ball.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="AEntity.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="EventHandler.h" />
     <ClInclude Include="Menu.h" />
-    <ClInclude Include="Paddle.h" />
     <ClInclude Include="PLayerController.h" />
     <ClInclude Include="TextField.h" />
     <ClInclude Include="UDPClient.h" />

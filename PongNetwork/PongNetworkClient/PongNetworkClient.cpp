@@ -4,7 +4,6 @@
 #include <SFML/Graphics.hpp>
 
 #include "Ball.h"
-#include "App.h"
 #include "Client.h"
 #pragma comment(lib, "ws2_32.lib")
 
@@ -15,150 +14,12 @@
 sf::Vector2f screenSize;
 
 int main()
-{/*
-    sf::RenderWindow window(sf::VideoMode({ 800, 800 }), "Ultimate Pong Supreme Battle Royale Deluxe 2");
-    screenSize = sf::Vector2f(window.getSize());
-    window.setFramerateLimit(60);
-
-#pragma region Initialize Winsock, create socket, and setup server adress
-
-    WSADATA wsaData;
-    SOCKET clientSocket;
-    sockaddr_in serverAddr;
-    char buffer[BUFFER_SIZE];
-
-    // Winsock initialization
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-    {
-        std::cerr << "Erreur Winsock !" << std::endl;
-        return 1;
-    }
-
-    // Socket creation
-    clientSocket = socket(AF_INET, SOCK_DGRAM, 0);
-    if (clientSocket == INVALID_SOCKET) {
-        std::cerr << "Erreur socket !" << std::endl;
-        WSACleanup();
-        return 1;
-    }
-
-    // Server adress configuration
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(PORT);
-
-    if (inet_pton(AF_INET, SERVER_IP, &serverAddr.sin_addr) <= 0)
-    {
-        std::cerr << "Erreur de conversion d'adresse IP !" << std::endl;
-        return 1;
-    }
-
-#pragma endregion
-
-#pragma region Connect and send message to introduce itself to the server
-
-    std::cout << "Tentative de connexion au serveur..." << std::endl;
-
-    std::string message = std::to_string(0) + " " + std::to_string(0);
-    if (!sendto(clientSocket, message.c_str(), message.size(), 0, (sockaddr*)&serverAddr, sizeof(serverAddr)))
-    {
-        std::cerr << "Impossible d'envoyer un message au serveur !" << std::endl;
-        return 1;
-    }
-
-    std::cout << "Demande de connexion envoyee au serveur." << std::endl;
-
-#pragma endregion
-
-#pragma region Receive message from server to initialize paddle and ball variables
-
-    int playerID = 0;
-    float paddleX = 0;
-    float paddleY = 0;
-    float ballX = 0;
-    float ballY = 0;
-    float ballDirectionX = 0;
-    float ballDirectionY = 0;
-
-    int serverAddrSize = sizeof(serverAddr);
-    int bytesReceived = recvfrom(clientSocket, buffer, BUFFER_SIZE, 0, (sockaddr*)&serverAddr, &serverAddrSize);
-    if (bytesReceived > 0)
-    {
-        buffer[bytesReceived] = '\0';
-
-        // Getting ID and position
-        sscanf_s(buffer, "%d %f %f %f %f %f %f", &playerID, &paddleX, &paddleY, &ballX, &ballY, &ballDirectionX, &ballDirectionY);
-        std::cout << "Vous etes le joueur " << playerID << ", votre paddle se situe en position " << paddleX << ", " << paddleY <<std::endl;
-        std::cout << "La balle se situe en " << ballX << ", " << ballY << ", et sa direction est " << ballDirectionX << ", " << ballDirectionY << std::endl;
-    }
-
-#pragma endregion
-
-    Paddle* playerPaddle = new Paddle(paddleX, paddleY, 20, 80, 500, screenSize);
-    Ball* ball = new Ball(ballX, ballY, 10, sf::Vector2f(ballDirectionX, ballDirectionY), screenSize);
-
-    std::string score = "";
-
-    // 1 : Left | 2 : Right | 3 : Up | 4 : Down
-    int sideOfScore = 0;
-
-#pragma region Manage gameplay and graphics with SFML and send and receive data from server to keep being updated
-
-    while (window.isOpen())
-    {
-        while (const std::optional event = window.pollEvent())
-        {
-            if (event->is<sf::Event::Closed>())
-                window.close();
-        }
-
-        // Send its ID and position to the server to keep it updated
-        std::string message = std::to_string(playerID) + " " + 
-            std::to_string(playerPaddle->GetPosition().x) + " " + std::to_string(playerPaddle->GetPosition().y);
-
-        sendto(clientSocket, message.c_str(), message.size(), 0, (sockaddr*)&serverAddr, sizeof(serverAddr));
-
-        ball->Move();
-        ball->OnPaddleCollision(playerPaddle);
-        
-        if (ball->GetPosition().x - (ball->GetShape().getRadius() * 2) <= 0)
-        {
-            sideOfScore = 1;
-
-            // Send which side the ball is to the server to determine who scored
-            std::string message = std::to_string(sideOfScore);
-            sendto(clientSocket, message.c_str(), message.size(), 0, (sockaddr*)&serverAddr, sizeof(serverAddr));
-        }
-        if (ball->GetPosition().x >= screenSize.x)
-        {
-            sideOfScore = 2;
-
-            // Send which side the ball is to the server to determine who scored
-            std::string message = std::to_string(sideOfScore);
-            sendto(clientSocket, message.c_str(), message.size(), 0, (sockaddr*)&serverAddr, sizeof(serverAddr));
-        }
-
-        window.clear();
-        // Dessiner le score à l'écran
-        playerPaddle->Draw(&window);
-        ball->Draw(&window);
-        window.display();
-    }
-
-#pragma endregion
-    */
+{
 #pragma region NewSFMLWindow
     
-    /*App app = App();
-    app.Run();*/
     Client client = Client();
     client.Run();
-#pragma endregion
-    
-#pragma region Winsock cleanup
-/*
-    closesocket(clientSocket);
-    WSACleanup();
-*/
+
 #pragma endregion
 
     return 0;
