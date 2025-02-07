@@ -9,6 +9,8 @@ enum PacketType
 	Paddle,
 	Score,
 	IsGameRunning,
+	PongType,
+	Disconnection,
 	Invalid
 };
 
@@ -36,6 +38,8 @@ private:
 	PLayerController* m_playerController;
 	UserInterface* m_userInterface;
 
+	sf::Clock* m_pingTime;
+
 	bool m_isInGame;
 	bool m_isConnected;
 	int m_clientId;
@@ -51,6 +55,7 @@ private:
 
 	void Connection(std::string ip, int port, std::string name);
 	void SendOnChangeInput(float input);
+	void SendPing();
 
 #pragma region HandleMessageMethods
 	void HandleMessageConnectionResponse(char(&buffer)[BUFFER_SIZE]);
@@ -60,6 +65,8 @@ private:
 	void HandleMessagePaddle(char(&buffer)[BUFFER_SIZE]);
 	void HandleMessageScore(char(&buffer)[BUFFER_SIZE]);
 	void HandleMessageIsGameRunning(char(&buffer)[BUFFER_SIZE]);
+	void HandleMessagePong(char(&buffer)[BUFFER_SIZE]);
+	void HandleMessageDisconnection(char(&buffer)[BUFFER_SIZE]);
 #pragma endregion
 
 

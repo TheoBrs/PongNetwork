@@ -22,6 +22,8 @@ PacketType Client::ResolvePacketType(const std::string& input)
 	if (input == "Paddle") return Paddle;
 	if (input == "Score") return Score;
 	if (input == "IsGameRunning") return IsGameRunning;
+	if (input == "Pong") return PongType;
+	if (input == "Disconnection") return Disconnection;
 	return PacketType::Invalid;
 }
 
@@ -59,10 +61,23 @@ void Client::Init()
 	m_userInterface = new UserInterface();
 	m_userInterface->Init(s_MainFont);
 
+	m_pingTime = new sf::Clock();
+	m_pingTime->reset();
 }
 
 void Client::Update(float deltaTime)
 {
+	if (!m_isConnected)
+	{
+		return;
+	}
+
+	if (m_pingTime->getElapsedTime().asSeconds() >= 2.f)
+	{
+		m_pingTime->restart();
+		SendPing();
+	}
+
 	if (!m_isInGame)
 	{
 		return;
@@ -101,6 +116,13 @@ void Client::Connection(std::string ip, int port, std::string name)
 void Client::SendOnChangeInput(float input)
 {
 	std::string messageToSend = "InputChange " + std::to_string(m_clientId) + " " + std::to_string(input);
+	m_udpClient->AddMessageToSend(messageToSend);
+}
+
+void Client::SendPing()
+{
+	m_pingTime->restart();
+	std::string messageToSend = "Ping " + std::to_string(m_clientId);
 	m_udpClient->AddMessageToSend(messageToSend);
 }
 
@@ -147,6 +169,11 @@ void Client::HandleMessage(char(&buffer)[BUFFER_SIZE])
 	case IsGameRunning:
 		HandleMessageIsGameRunning(buffer);
 		break;
+	case PongType:
+		HandleMessagePong(buffer);
+		break;
+	case Disconnection:
+		HandleMessageDisconnection(buffer);
 	case Invalid:
 		break;
 	default:
@@ -168,6 +195,7 @@ void Client::HandleMessageConnectionResponse(char(&buffer)[BUFFER_SIZE])
 
 	m_clientId = clientId;
 	m_isConnected = true;
+	m_pingTime->start();
 }
 
 void Client::HandleMessageGameSettings(char(&buffer)[BUFFER_SIZE])
@@ -251,6 +279,7 @@ void Client::HandleMessageScore(char(&buffer)[BUFFER_SIZE])
 	sscanf_s(buffer, "%s %d %d", &type, (unsigned)_countof(type), &scoreLeft, &scoreRight);
 
 	m_game->SetScore(scoreLeft, scoreRight);
+	m_userInterface->SetScore(scoreLeft, scoreRight);
 }
 
 void Client::HandleMessageIsGameRunning(char(&buffer)[BUFFER_SIZE])
@@ -271,6 +300,22 @@ void Client::HandleMessageIsGameRunning(char(&buffer)[BUFFER_SIZE])
 
 }
 
+void Client::HandleMessagePong(char(&buffer)[BUFFER_SIZE])
+{
+	sf::Time pingms = m_pingTime->getElapsedTime();
+	
+}
+
+void Client::HandleMessageDisconnection(char(&buffer)[BUFFER_SIZE])
+{
+	char type[50];
+	int playerId;
+	sscanf_s(buffer, "%s %d", &type, (unsigned)_countof(type), &playerId);
+
+	m_userInterface->SetPlayerConnection(playerId, false);
+
+}
+
 #pragma endregion
 
 void Client::Run()
@@ -287,4 +332,5 @@ void Client::Run()
 
 		m_udpClient->SendMessagesUDP();
 	}
+	m_udpClient->UnInit();
 }

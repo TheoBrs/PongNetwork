@@ -18,6 +18,13 @@ void UserInterface::Init(sf::Font* font)
 
 void UserInterface::AddPlayer(int id, std::string name, bool isConnected)
 {
+    if (m_players.find(id) != m_players.end() )
+    {
+        SetPlayerConnection(id, isConnected);
+        SetPlayerName(id, name);
+        SetPlayerScore(id, 0);
+        return;
+    }
     PlayerInfos* newPlayer = new PlayerInfos() ;
     newPlayer->Name = new sf::Text(*m_font);
     newPlayer->Name->setString(name);
@@ -56,3 +63,10 @@ void UserInterface::SetPlayerScore(int id, int score)
 {
     m_players[id]->Score->setString(std::to_string(score));
 }
+
+void UserInterface::SetScore(int scoreLeft, int scoreRight)
+{
+    m_players[0]->Score->setString(std::to_string(scoreLeft));
+    m_players[1]->Score->setString(std::to_string(scoreRight));
+}
+

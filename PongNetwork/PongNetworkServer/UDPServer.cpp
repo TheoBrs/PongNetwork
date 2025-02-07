@@ -1,6 +1,7 @@
 #include <ws2tcpip.h>
 #include <iostream>
 #include <array>
+#include <SFML/System/Time.hpp>
 #include "UDPServer.h"
 int UDPServer::InitWinsock()
 {
@@ -119,8 +120,29 @@ int UDPServer::ReceiveMessages(BuffersToTreat* buffers)
 
 void UDPServer::AddClient(int clientID, const sockaddr_in& address, const std::string& name)
 {
-    m_clients[clientID] = {name, address };
+    m_clients[clientID] = {name, address, new sf::Clock(), true};
     m_messagesToSend[clientID] = std::vector<std::string>();
+
+}
+
+void UDPServer::SetClientConnected(int id, bool value)
+{
+    m_clients[id].IsConnected = value;
+}
+
+bool UDPServer::GetIsClientConnected(int id)
+{
+    return m_clients[id].IsConnected;
+}
+
+sf::Time UDPServer::GetClientElapsedTimeLastPing(int id)
+{
+    return m_clients[id].PingTime->getElapsedTime();
+}
+
+void UDPServer::RestartPingTimeClient(int id)
+{
+    m_clients[id].PingTime->restart();
 }
 
 std::string UDPServer::GetClientName(int id)
@@ -131,6 +153,19 @@ std::string UDPServer::GetClientName(int id)
 std::unordered_map<int, Client> UDPServer::GetClients()
 {
     return m_clients;
+}
+
+int UDPServer::GetFirstPlayerDisconnected()
+{
+    for (auto [id, client] : m_clients) 
+    {
+        if (!client.IsConnected)
+        {
+            return id;
+        }
+    }
+
+    return -1;
 }
 
 void UDPServer::UnInit()
