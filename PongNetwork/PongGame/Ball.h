@@ -37,6 +37,9 @@ namespace Pong
         sf::Vector2f GetPosition() const;
         sf::Vector2f GetDirection() const;
 
+        void SetDirection(const sf::Vector2f& dir);
+        void SetPosition(const sf::Vector2f& pos);
+
         Utils::EventCallback<void> OnBounce;
 	};
 

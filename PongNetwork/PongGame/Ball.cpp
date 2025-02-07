@@ -182,3 +182,13 @@ sf::Vector2f Pong::Ball::GetDirection() const
 {
 	return m_direction;
 }
+
+void Pong::Ball::SetDirection(const sf::Vector2f& dir)
+{
+	m_direction = dir;
+}
+
+void Pong::Ball::SetPosition(const sf::Vector2f& pos)
+{
+	m_shape->setPosition(pos);
+}

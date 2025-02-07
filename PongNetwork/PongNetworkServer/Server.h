@@ -17,6 +17,7 @@ namespace Pong
 
 
 inline constexpr int TICK_TIME_MILLISECOND = 16;
+inline constexpr float TIME_BETWEEN_ROUNDS = 2.f;
 
 enum PacketType
 {
@@ -34,6 +35,9 @@ private:
 	Pong::Game* m_game;
 	std::unordered_map<int, bool> m_players;
 	Pong::GameSettings* m_gameSettings;
+	bool m_isGameLaunched;
+	float m_timeElapsedBeforeLastReset;
+
 
 	void Update(float deltaTime);
 	void Init();

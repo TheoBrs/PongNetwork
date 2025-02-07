@@ -25,6 +25,7 @@ void App::Run()
 		HandleEvents();
 		Update();
 		Draw();
+		m_udpClient->SendMessagesUDP();
 	}
 	m_udpClient->UnInit();
 }
@@ -114,7 +115,7 @@ void App::HandleServerMessages()
 		// Send a ping to the server with its client ID
 		std::string messageToSend = "Ping";
 		messageToSend += " " + std::to_string(m_clientId);
-		m_udpClient->SendMessageUDP(messageToSend);
+		m_udpClient->AddMessageToSend(messageToSend);
 	}
 	else if (messageType == "PlayerDisconnected")
 	{
@@ -202,7 +203,7 @@ void App::Update()
 			// Send which player scored to the server
 			std::string messageToSend = "Score";
 			messageToSend += " " + std::to_string(playerWhoScored);
-			m_udpClient->SendMessageUDP(messageToSend);
+			m_udpClient->AddMessageToSend(messageToSend);
 		}
 
 		if (m_ball->GetPosition().x >= GetWindowSize().x)
@@ -212,7 +213,7 @@ void App::Update()
 			// Send which player scored to the server
 			std::string messageToSend = "Score";
 			messageToSend += " " + std::to_string(playerWhoScored);
-			m_udpClient->SendMessageUDP(messageToSend);
+			m_udpClient->AddMessageToSend(messageToSend);
 		}
 	}
 
@@ -228,7 +229,7 @@ void App::Update()
 			// Send a ping to the server with its client ID
 			std::string messageToSend = "Ping";
 			messageToSend += " " + std::to_string(m_clientId);
-			m_udpClient->SendMessageUDP(messageToSend);
+			m_udpClient->AddMessageToSend(messageToSend);
 		}
 	}
 }
@@ -347,7 +348,7 @@ void App::OnChangeUpAxis()
 	+ std::to_string(m_inputMove) + " "
 	+ std::to_string(m_paddle->GetPosition().x) + " "
 	+ std::to_string(m_paddle->GetPosition().y);
-	m_udpClient->SendMessageUDP(messageToSend);
+	m_udpClient->AddMessageToSend(messageToSend);
 }
 
 void App::SetErroText(const std::string& text)

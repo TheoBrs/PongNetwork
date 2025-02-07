@@ -9,6 +9,15 @@
 void Server::Update(float deltaTime)
 {
 	m_game->Update(deltaTime);
+	if (m_isGameLaunched)
+	{
+		m_timeElapsedBeforeLastReset += deltaTime;
+		if (m_timeElapsedBeforeLastReset >= TIME_BETWEEN_ROUNDS && !m_game->GetIsGameRunning())
+		{
+			m_game->SetIsGameRunning(true);
+			SendGameIsRunning();
+		}
+	}
 }
 
 void Server::Init()
@@ -25,17 +34,20 @@ void Server::Init()
 		PADDLE_SETTINGS_LEFT,
 		PADDLE_SETTINGS_RIGHT
 	};
-
+	m_isGameLaunched = false;
 	m_game->Init(*m_gameSettings);
 	m_game->SetIsGameRunning(false);
 
 	m_game->GetBall()->OnBounce += [this]() {SendBallCurrentState(); };
-	m_game->OnAddScore += [this](bool isLeft) 
+	m_game->OnAddScore += [this](bool isLeft)
 		{
+			m_timeElapsedBeforeLastReset = 0.f;
 			m_game->ResetForNewRound();
 			m_game->SetIsGameRunning(false);
 			SendGameState();
 		};
+	m_game->GetBall()->SetDirection({ 4.3f, 3.7f });
+
 
 }
 
@@ -53,16 +65,14 @@ PacketType Server::ResolvePacketType(const std::string& input)
 
 void Server::ProcessMessages(const BuffersToTreat& buffers)
 {
-	for (auto& [clientAddr, bufferList] : buffers)
+	for (auto& [clientAddr, buffer] : buffers)
 	{
-		for (auto buffer : bufferList) 
-		{
-			std::string message(std::begin(buffer), std::end(buffer));
-			auto packetType = message.substr(0, message.find(' '));
-			ProcessPacketByType(packetType, clientAddr,buffer);
-		}
 
+		std::string message(std::begin(buffer), std::end(buffer));
+		auto packetType = message.substr(0, message.find(' '));
+		ProcessPacketByType(packetType, clientAddr,buffer);
 	}
+
 }
 
 void Server::ProcessPacketByType(
@@ -108,8 +118,22 @@ void Server::HandleConnectionRequest(
 	std::string nameString = name;
 
 	std::string messageNewPlayer = "NewPlayer " + nameString + " " + std::to_string(isLeft ? 1 : 0);
-	m_udpServer->AddMessageUDPAll(messageConnectionResponse);
-	
+	m_udpServer->AddMessageUDPAll(messageNewPlayer);
+	for ( auto [id, isLeftPlayer] : m_players )
+	{
+		if (id != clientId) 
+		{
+			messageNewPlayer = "NewPlayer " + nameString + " " + std::to_string(isLeftPlayer ? 1 : 0);
+			m_udpServer->AddMessageUDP(clientId, messageNewPlayer);
+		}
+	}
+
+	if (m_players.size() >= 2)
+	{
+		m_game->SetIsGameRunning(true);
+		SendGameState();
+		m_isGameLaunched = true;
+	}
 }
 
 void Server::HandleInputChange(const std::array<char, BUFFER_SIZE>& buffer)
@@ -121,7 +145,7 @@ void Server::HandleInputChange(const std::array<char, BUFFER_SIZE>& buffer)
 	float upAxis;
 	sscanf_s(bufferC, "%s %d %f", &type, (unsigned)_countof(type), &clientId, &upAxis);
 	
-	upAxis = std::clamp<float>(-1.f, 1.f, upAxis);
+	upAxis = std::clamp<float>(upAxis, -1.f, 1.f);
 	Pong::Paddle* paddle = m_game->GetPaddle(m_players[clientId]);
 	paddle->SetDirection(upAxis);
 	SendPaddleCurrentState(clientId);
@@ -144,9 +168,10 @@ void Server::SendPaddleCurrentState(int clientId)
 	Pong::Paddle* paddle = m_game->GetPaddle(m_players[clientId]);
 
 	float upAxis = paddle->GetDirection();
+	bool isLeft = m_players[clientId];
 	std::string messageToSend =
 		"Paddle " +
-		std::to_string(clientId) + " " +
+		std::to_string(isLeft ? 1 : 0) + " " +
 		std::to_string(upAxis) + " " +
 		std::to_string(paddle->GetPosition().x) + " " +
 		std::to_string(paddle->GetPosition().y) + " "
@@ -169,7 +194,8 @@ void Server::SendGameIsRunning()
 {
 	std::string messageToSend =
 		"IsGameRunning " +
-		std::to_string(m_game->GetIsGameRunning());
+		std::to_string(m_game->GetIsGameRunning() ? 1 : 0);
+	m_udpServer->AddMessageUDPAll(messageToSend);
 }
 
 void Server::SendGameState()

@@ -45,7 +45,7 @@ void Pong::Paddle::SetPosition(const sf::Vector2f& newPosition)
 
 void Pong::Paddle::SetDirection(float value)
 {
-    m_directionY = std::clamp<float>(-1.f, 1.f, value);
+    m_directionY = std::clamp<float>(value ,-1.f, 1.f);
 }
 
 sf::RectangleShape* Pong::Paddle::GetShape() const

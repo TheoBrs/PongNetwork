@@ -20,7 +20,6 @@ int UDPServer::InitSocket()
         WSACleanup();
         return 1;
     }
-    return 0;
 
     // Server adress and port configuration
     m_address.sin_family = AF_INET;
@@ -57,6 +56,13 @@ int UDPServer::Init()
     }
     return 0;
 }
+
+void UDPServer::SendDirectMessageToAddr(sockaddr_in addr, std::string message)
+{
+    sendto(m_socket, message.c_str(), message.size(), 0, (sockaddr*)&addr, sizeof(addr));
+}
+
+
 
 void UDPServer::AddMessageUDP(int clientID, const std::string& message)
 {
@@ -102,13 +108,14 @@ int UDPServer::ReceiveMessages(BuffersToTreat* buffers)
             buffer[bytesReceived] = '\0';
             std::array<char, BUFFER_SIZE> bufferStd;
             std::copy(std::begin(buffer), std::end(buffer), std::begin(bufferStd));
-            (*buffers)[clientAddr].push_back(bufferStd);
+            (*buffers).push_back({ clientAddr, bufferStd });
         }
 
     } while (bytesReceived != SOCKET_ERROR);
 
     return 0;
 }
+
 
 void UDPServer::AddClient(int clientID, const sockaddr_in& address, const std::string& name)
 {

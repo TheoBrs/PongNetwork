@@ -45,7 +45,7 @@ void Pong::Game::Update(float deltaTime)
 void Pong::Game::ResetForNewRound()
 {
 	sf::Vector2f posLeft(m_settings.PaddleLeft.BasePosition);
-	sf::Vector2f posRight(m_settings.PaddleLeft.BasePosition);
+	sf::Vector2f posRight(m_settings.PaddleRight.BasePosition);
 	sf::Vector2f posBall(m_settings.Ball.BasePosition);
 	m_paddleLeft->SetPosition(posLeft);
 	m_paddleRight->SetPosition(posRight);
@@ -61,6 +61,12 @@ void Pong::Game::AddScore(bool isLeft)
 int Pong::Game::GetScore(bool isLeft)
 {
 	return isLeft ? m_scoreLeft : m_scoreRight;
+}
+
+void Pong::Game::SetScore(int scoreLeft, int scoreRight)
+{
+	m_scoreLeft = scoreLeft;
+	m_scoreRight = scoreRight;
 }
 
 void Pong::Game::SetIsGameRunning(bool isGameRunning)

@@ -33,6 +33,7 @@ namespace Pong
 
 		void AddScore(bool isLeft);
 		int GetScore(bool isLeft);
+		void SetScore(int scoreLeft, int scoreRight);
 
 		void SetIsGameRunning(bool isGameRunning);
 		bool GetIsGameRunning();

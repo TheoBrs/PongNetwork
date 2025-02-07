@@ -1,5 +1,5 @@
 #pragma once
-
+#include "UDPClient.h"
 enum PacketType
 {
 	ConnectionResponse,
@@ -22,8 +22,8 @@ namespace sf
 	class Font;
 }
 
-class UDPClient;
 class Menu;
+class PLayerController;
 
 class Client
 {
@@ -32,14 +32,34 @@ private:
 	Pong::Game* m_game;
 	Menu* m_menu;
 	sf::RenderWindow* m_window;
+	PLayerController* m_playerController;
 
 	bool m_isInGame;
+	bool m_isConnected;
+	int m_clientId;
+
+	PacketType ResolvePacketType(const std::string& input);
 
 	void Init();
 	void Update(float deltaTime);
 	void Draw();
 	void HandleSfmlEvents();
+	void GetMessages();
+	void HandleMessage(char(&buffer)[BUFFER_SIZE]);
+
 	void Connection(std::string ip, int port, std::string name);
+	void SendOnChangeInput(float input);
+
+#pragma region HandleMessageMethods
+	void HandleMessageConnectionResponse(char(&buffer)[BUFFER_SIZE]);
+	void HandleMessageGameSettings(char(&buffer)[BUFFER_SIZE]);
+	void HandleMessageNewPlayer(char(&buffer)[BUFFER_SIZE]);
+	void HandleMessageBall(char(&buffer)[BUFFER_SIZE]);
+	void HandleMessagePaddle(char(&buffer)[BUFFER_SIZE]);
+	void HandleMessageScore(char(&buffer)[BUFFER_SIZE]);
+	void HandleMessageIsGameRunning(char(&buffer)[BUFFER_SIZE]);
+#pragma endregion
+
 
 public:
 	void Run();

@@ -15,7 +15,7 @@ protected:
     SOCKET m_socket;
 public:
     virtual int Init();
-    virtual void SendMessageUDP(std::string message){}
+    virtual void SendMessagesUDP(){}
     virtual int ReceiveMessage(char (&buffer)[BUFFER_SIZE])  = 0;
     void UnInit();
 };
