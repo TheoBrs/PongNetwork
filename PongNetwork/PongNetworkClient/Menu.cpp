@@ -33,7 +33,8 @@ void Menu::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	target.draw(*m_addrField, states);
 	target.draw(*m_validationButton, states);
 	target.draw(*m_errorText, states);
-
+	target.draw(*m_nameText, states);
+	target.draw(*m_adressText, states);
 }
 
 void Menu::Init(sf::Font* font)
@@ -41,15 +42,20 @@ void Menu::Init(sf::Font* font)
 	m_nameField = new TextField();
 	m_nameField->Init({ 625,145 },{ 350,75 }, "", font);
 
+	m_nameText = new sf::Text(*font, "Name :");
+	m_nameText->setPosition({ 500, 160 });
+
 	m_addrField = new TextField();
 	m_addrField->Init({ 625,245 }, { 350,75 }, "", font);
+
+	m_adressText = new sf::Text(*font, "IP Adress :");
+	m_adressText->setPosition({ 450, 260 });
 
 	m_validationButton = new Button();
 	m_validationButton->Init({ 625,345 }, { 350,75 }, "Validate", font);
 
 	m_errorText = new sf::Text(*font);
 	SetErrorText("Error Text");
-	m_errorText->setPosition({ 800.f, 500.f });
 
 	m_validationButton->OnClickEvent += [this]() {OnValidate(); };
 }
@@ -60,7 +66,9 @@ void Menu::SetErrorText(const std::string& text)
 	auto localBounds = center + m_errorText->getLocalBounds().position;
 	auto rounded = sf::Vector2f{ std::round(localBounds.x), std::round(localBounds.y) };
 	m_errorText->setOrigin(rounded);
+	m_errorText->setPosition({ 740.f, 500.f });
 
+	m_errorText->setString(text);
 }
 
 bool Menu::GetIsActive()

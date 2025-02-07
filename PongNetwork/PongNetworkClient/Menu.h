@@ -19,6 +19,8 @@ private:
 	TextField* m_addrField;
 	Button* m_validationButton;
 	sf::Text* m_errorText;
+	sf::Text* m_adressText;
+	sf::Text* m_nameText;
 
 	void OnValidate();
 protected:
