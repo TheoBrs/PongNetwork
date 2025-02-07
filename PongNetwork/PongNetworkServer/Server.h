@@ -22,7 +22,7 @@ inline constexpr float TIME_BETWEEN_ROUNDS = 2.f;
 enum PacketType
 {
 	ConnectionRequest,
-	ConnectionResponse,
+	Ping,
 	InputChange,
 	Disconnection,
 	Invalid
@@ -52,6 +52,7 @@ private:
 		const sockaddr_in& address, const std::array<char, BUFFER_SIZE>& buffer);
 	void HandleInputChange(
 		const std::array<char, BUFFER_SIZE>& buffer);
+	void HandlePing(const std::array<char, BUFFER_SIZE>& buffer);
 
 	void SendBallCurrentState();
 	void SendPaddleCurrentState(int clientId);
@@ -61,6 +62,8 @@ private:
 	void SendGameState();
 	void SendGameSettings(int clientID);
 
+	void SendPong(int clientID);
+	void SendClientDisconnected(int clientIdDisconnected);
 public:
 	void Run();
 

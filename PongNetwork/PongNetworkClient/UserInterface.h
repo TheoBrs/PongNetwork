@@ -37,6 +37,7 @@ public:
     void SetPlayerConnection(int id, bool isConnected);
     void SetPlayerName(int id, std::string name);
     void SetPlayerScore(int id, int score);
+    void SetScore(int scoreLeft, int scoreRight);
 };
 // code qui fait des _Struct_size_bytes_(
 //     appeler code qui fait des trucs

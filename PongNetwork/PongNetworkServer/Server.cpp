@@ -9,6 +9,22 @@
 void Server::Update(float deltaTime)
 {
 	m_game->Update(deltaTime);
+	for (auto [playerId , _] : m_players)
+	{
+		sf::Time pingElapsedTime = m_udpServer->GetClientElapsedTimeLastPing(playerId);
+		float seconds = pingElapsedTime.asSeconds();
+		if (seconds >= 7.f && m_udpServer->GetIsClientConnected(playerId))
+		{
+			m_udpServer->SetClientConnected(playerId, false);
+			SendClientDisconnected(playerId);
+			
+			m_game->SetScore(0,0);
+			m_game->SetIsGameRunning(false);
+			m_game->ResetForNewRound();
+			m_isGameLaunched = false;
+			SendGameState();
+		}
+	}
 	if (m_isGameLaunched)
 	{
 		m_timeElapsedBeforeLastReset += deltaTime;
@@ -54,7 +70,7 @@ void Server::Init()
 PacketType Server::ResolvePacketType(const std::string& input)
 {
 	if (input == "ConnectionRequest") return ConnectionRequest;
-	if (input == "ConnectionResponse") return ConnectionResponse;
+	if (input == "Ping") return Ping;
 	if (input == "InputChange") return InputChange;
 	if (input == "Disconnection") return Disconnection;
 
@@ -82,6 +98,9 @@ void Server::ProcessPacketByType(
 	case PacketType::ConnectionRequest:
 		HandleConnectionRequest(address, buffer);
 		break;
+	case PacketType::Ping:
+		HandlePing(buffer);
+		break;
 	case PacketType::InputChange:
 		HandleInputChange(buffer);
 		break;
@@ -94,11 +113,22 @@ void Server::HandleConnectionRequest(
 	const sockaddr_in& address, const std::array<char, BUFFER_SIZE>& buffer)
 {
 	int nbClient = m_udpServer->GetClients().size();
-	if (nbClient >= 2)
+	
+	if (nbClient >= 2 && m_udpServer->GetIsClientConnected(0) && m_udpServer->GetIsClientConnected(1))
 	{
 		return;
 	}
-	int clientId = nbClient;
+
+	int clientId;
+	int firstClientDisconnected = m_udpServer->GetFirstPlayerDisconnected();
+	if (firstClientDisconnected != -1)
+	{
+		clientId = firstClientDisconnected;
+	}
+	else 
+	{
+		clientId = nbClient;
+	}
 
 	char bufferC[BUFFER_SIZE];
 	std::copy(std::begin(buffer), std::end(buffer), std::begin(bufferC));
@@ -147,6 +177,18 @@ void Server::HandleInputChange(const std::array<char, BUFFER_SIZE>& buffer)
 	Pong::Paddle* paddle = m_game->GetPaddle(m_players[clientId]);
 	paddle->SetDirection(upAxis);
 	SendPaddleCurrentState(clientId);
+}
+
+void Server::HandlePing(const std::array<char, BUFFER_SIZE>& buffer)
+{
+	char bufferC[BUFFER_SIZE];
+	std::copy(std::begin(buffer), std::end(buffer), std::begin(bufferC));
+	char type[50];
+	int clientId;
+	sscanf_s(bufferC, "%s %d", &type, (unsigned)_countof(type), &clientId);
+	m_udpServer->RestartPingTimeClient(clientId);
+
+	SendPong(clientId);
 }
 
 void Server::SendBallCurrentState()
@@ -240,6 +282,17 @@ void Server::SendGameSettings(int clientID)
 		ballSettings;
 	
 	m_udpServer->AddMessageUDP(clientID, messageToSend);
+}
+
+void Server::SendPong(int clientID)
+{
+	m_udpServer->AddMessageUDP(clientID, "Pong");
+}
+
+void Server::SendClientDisconnected(int clientIdDisconnected)
+{
+	std::string messageToSend = "Disconnection " + std::to_string(clientIdDisconnected);
+	m_udpServer->AddMessageUDPAll(messageToSend);
 }
 
 
