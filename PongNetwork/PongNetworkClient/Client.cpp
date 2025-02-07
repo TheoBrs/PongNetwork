@@ -9,6 +9,7 @@
 #include "../PongGame/Ball.h"
 #include "../PongGame/Paddle.h"
 #include "PLayerController.h"
+#include "UserInterface.h"
 
 sf::Font* Client::s_MainFont = nullptr;
 
@@ -55,6 +56,9 @@ void Client::Init()
 	m_playerController->Init();
 	m_playerController->OnChangeInput += [this](float input) {SendOnChangeInput(input); };
 
+	m_userInterface = new UserInterface();
+	m_userInterface->Init(s_MainFont);
+
 }
 
 void Client::Update(float deltaTime)
@@ -77,6 +81,7 @@ void Client::Draw()
 	else
 	{
 		m_window->draw(*m_game);
+		m_window->draw(*m_userInterface);
 	}
 	m_window->display();
 }
@@ -195,6 +200,14 @@ void Client::HandleMessageGameSettings(char(&buffer)[BUFFER_SIZE])
 void Client::HandleMessageNewPlayer(char(&buffer)[BUFFER_SIZE])
 {
 	// to getting name for UI
+	char type[50];
+	char name[100];
+	int clientId;
+	sscanf_s(buffer, "%s %s %d", &type, (unsigned)_countof(type), &name, (unsigned)_countof(name), &clientId);
+	std::string nameString(name);
+	m_userInterface->AddPlayer(clientId, nameString, true);
+
+
 }
 
 void Client::HandleMessageBall(char(&buffer)[BUFFER_SIZE])

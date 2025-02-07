@@ -27,11 +27,12 @@ class UserInterface : public sf::Drawable
     
 private:
     std::unordered_map<int, PlayerInfos*> m_players;
+    sf::Font* m_font;
 protected:
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 public:
-    void Init();
+    void Init(sf::Font* font);
     void AddPlayer(int id, std::string name, bool isConnected);
     void SetPlayerConnection(int id, bool isConnected);
     void SetPlayerName(int id, std::string name);

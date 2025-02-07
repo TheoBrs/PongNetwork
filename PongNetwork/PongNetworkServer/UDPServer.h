@@ -37,6 +37,7 @@ public:
 
 
     void AddClient(int clientID, const sockaddr_in& address, const std::string& name);
+    std::string GetClientName(int id);
     std::unordered_map<int, Client> GetClients();
 
     void UnInit();

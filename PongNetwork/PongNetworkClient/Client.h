@@ -24,6 +24,7 @@ namespace sf
 
 class Menu;
 class PLayerController;
+class UserInterface;
 
 class Client
 {
@@ -33,6 +34,7 @@ private:
 	Menu* m_menu;
 	sf::RenderWindow* m_window;
 	PLayerController* m_playerController;
+	UserInterface* m_userInterface;
 
 	bool m_isInGame;
 	bool m_isConnected;

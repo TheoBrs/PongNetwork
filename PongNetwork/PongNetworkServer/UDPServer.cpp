@@ -123,6 +123,11 @@ void UDPServer::AddClient(int clientID, const sockaddr_in& address, const std::s
     m_messagesToSend[clientID] = std::vector<std::string>();
 }
 
+std::string UDPServer::GetClientName(int id)
+{
+    return m_clients[id].Name;
+}
+
 std::unordered_map<int, Client> UDPServer::GetClients()
 {
     return m_clients;

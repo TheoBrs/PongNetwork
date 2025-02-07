@@ -175,7 +175,7 @@ void App::Init()
 	m_errorText->setPosition({800.f, 500.f});
 	
 	m_userInterface = new UserInterface();
-	m_userInterface->Init();
+	m_userInterface->Init(MainFont);
 	
 }
 

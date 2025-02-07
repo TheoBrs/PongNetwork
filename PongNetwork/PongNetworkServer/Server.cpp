@@ -67,12 +67,10 @@ void Server::ProcessMessages(const BuffersToTreat& buffers)
 {
 	for (auto& [clientAddr, buffer] : buffers)
 	{
-
 		std::string message(std::begin(buffer), std::end(buffer));
 		auto packetType = message.substr(0, message.find(' '));
 		ProcessPacketByType(packetType, clientAddr,buffer);
 	}
-
 }
 
 void Server::ProcessPacketByType(
@@ -117,13 +115,13 @@ void Server::HandleConnectionRequest(
 	SendGameSettings(clientId);
 	std::string nameString = name;
 
-	std::string messageNewPlayer = "NewPlayer " + nameString + " " + std::to_string(isLeft ? 1 : 0);
+	std::string messageNewPlayer = "NewPlayer " + nameString + " " + std::to_string(clientId);
 	m_udpServer->AddMessageUDPAll(messageNewPlayer);
 	for ( auto [id, isLeftPlayer] : m_players )
 	{
 		if (id != clientId) 
 		{
-			messageNewPlayer = "NewPlayer " + nameString + " " + std::to_string(isLeftPlayer ? 1 : 0);
+			messageNewPlayer = "NewPlayer " + m_udpServer->GetClientName(id) + " " + std::to_string(id);
 			m_udpServer->AddMessageUDP(clientId, messageNewPlayer);
 		}
 	}
