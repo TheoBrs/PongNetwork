@@ -5,7 +5,7 @@
 
 #include "Ball.h"
 #include "App.h"
-
+#include "Client.h"
 #pragma comment(lib, "ws2_32.lib")
 
 #define SERVER_IP "127.0.0.1"
@@ -147,8 +147,11 @@ int main()
 #pragma endregion
     */
 #pragma region NewSFMLWindow
-    App app = App();
-    app.Run();
+    
+    /*App app = App();
+    app.Run();*/
+    Client client = Client();
+    client.Run();
 #pragma endregion
     
 #pragma region Winsock cleanup

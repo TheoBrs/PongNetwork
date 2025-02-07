@@ -13,14 +13,23 @@ int UDPClient::Init()
     return 0;
 }
 
-void UDPClient::SendMessageUDP(std::string message)
+void UDPClient::SendMessagesUDP()
 {
-    UDPService::SendMessageUDP(message);
-    if (!sendto(m_socket, message.c_str(), message.size(), 0, (sockaddr*)&m_serverAddr, sizeof(m_serverAddr)))
+    UDPService::SendMessagesUDP();
+    for (auto message : m_messages) 
     {
-        std::cerr << "Impossible d'envoyer un message au serveur !" << std::endl;
-        return;
+        if (!sendto(m_socket, message.c_str(), message.size(), 0, (sockaddr*)&m_serverAddr, sizeof(m_serverAddr)))
+        {
+            std::cerr << "Impossible d'envoyer un message au serveur !" << std::endl;
+            continue;
+        }
     }
+    m_messages.clear();
+}
+
+void UDPClient::AddMessageToSend(std::string message)
+{
+    m_messages.push_back(message);
 }
 
 int UDPClient::ReceiveMessage(char (&buffer)[BUFFER_SIZE])
@@ -54,7 +63,7 @@ int UDPClient::TryConnect(const std::string& ip, unsigned port, std::string name
     std::cout << "Tentative de connexion au serveur..." << std::endl;
 
     std::string message = "ConnectionRequest " + name;
-    SendMessageUDP(message);
+    AddMessageToSend(message);
 
     std::cout << "Demande de connexion envoyee au serveur." << std::endl;
     return 0;

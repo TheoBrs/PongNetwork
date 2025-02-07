@@ -12,16 +12,17 @@ void UserInterface::draw(sf::RenderTarget& target, sf::RenderStates states) cons
     }
 }
 
-void UserInterface::Init()
+void UserInterface::Init(sf::Font* font)
 {
+    m_font = font;
 }
 
 void UserInterface::AddPlayer(int id, std::string name, bool isConnected)
 {
     PlayerInfos* newPlayer = new PlayerInfos() ;
-    newPlayer->Name = new sf::Text(*App::MainFont);
+    newPlayer->Name = new sf::Text(*m_font);
     newPlayer->Name->setString(name);
-    newPlayer->Score = new sf::Text(*App::MainFont);
+    newPlayer->Score = new sf::Text(*m_font);
     newPlayer->Score->setString("0");
     newPlayer->ConnectionState = new sf::CircleShape(CONNECTION_STATE_SIZE);
     sf::Color color = isConnected ? sf::Color::Green : sf::Color::Red;

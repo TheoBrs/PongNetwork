@@ -9,6 +9,7 @@ namespace sf
 {
 	class RectangleShape;
 	class Text;
+	class Font;
 }
 class Button : public AEntity
 {
@@ -20,10 +21,10 @@ protected:
 	bool isMouseHoveringButton();
 	sf::RectangleShape* m_shape = nullptr;
 	virtual void OnClick() {};
-	virtual void OnInit() {};
+	virtual void OnInit(sf::Font* font) {};
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 public:
 	Utils::EventCallback<void> OnClickEvent;
-	void Init(const sf::Vector2f& position, const sf::Vector2f& size, std::string text);
+	void Init(const sf::Vector2f& position, const sf::Vector2f& size, std::string text, sf::Font* font);
 };
 

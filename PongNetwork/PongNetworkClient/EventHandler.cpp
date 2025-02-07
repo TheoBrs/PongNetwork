@@ -6,16 +6,23 @@ Utils::EventCallback<void, const sf::Event::KeyPressed*> EventHandler::OnKeyPres
 Utils::EventCallback<void, const sf::Event::KeyReleased*> EventHandler::OnKeyReleased;
 Utils::EventCallback<void, const sf::Event::MouseButtonPressed*> EventHandler::OnMouseButtonPressed;
 Utils::EventCallback<void, const sf::Event::TextEntered*> EventHandler::OnTextEntered;
-void EventHandler::HandleEvent(sf::RenderWindow* window)
+sf::RenderWindow* EventHandler::s_window = nullptr;
+
+void EventHandler::Init(sf::RenderWindow* window)
+{
+    s_window = window;
+}
+
+void EventHandler::HandleEvent()
 {
 
-    while (const std::optional event = window->pollEvent())
+    while (const std::optional event = s_window->pollEvent())
     {
         
         if (event->is<sf::Event::Closed>())
         {
             OnWindowClose();
-            window->close();
+            s_window->close();
             
         }
         else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
@@ -23,7 +30,7 @@ void EventHandler::HandleEvent(sf::RenderWindow* window)
             OnKeyPressed(keyPressed);
             if (keyPressed->scancode == sf::Keyboard::Scancode::Escape)
             {
-                window->close();
+                s_window->close();
             }
         }
         else if (const auto* mouseClick = event->getIf<sf::Event::MouseButtonPressed>())
@@ -41,5 +48,10 @@ void EventHandler::HandleEvent(sf::RenderWindow* window)
     }
     
     
+}
+
+sf::Vector2f EventHandler::GetMousePosition()
+{
+    return sf::Vector2f(sf::Mouse::getPosition(*s_window));
 }
 

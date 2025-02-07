@@ -25,7 +25,7 @@ private:
     
 protected:
     void OnClick() override;
-    void OnInit() override;
+    void OnInit(sf::Font* font) override;
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 public:

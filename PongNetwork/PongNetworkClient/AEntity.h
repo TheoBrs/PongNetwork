@@ -10,6 +10,11 @@ namespace sf
 
 class AEntity : public sf::Transformable, public sf::Drawable
 {
+protected:
+	bool m_isActive;
 
+public:
+	void SetActive(bool value);
+	bool GetIsActive();
 };
 
