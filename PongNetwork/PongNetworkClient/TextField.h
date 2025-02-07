@@ -2,6 +2,9 @@
 #include <SFML/Window/Event.hpp>
 #include "Button.h"
 #include "EventCallback.h"
+
+
+
 namespace sf
 {
     class Text;
@@ -16,7 +19,8 @@ private:
     size_t m_callbackInputKeyId;
     size_t m_callbackOnClickId;
     sf::Text* m_textField;
-    
+    int m_maxCharacter = 100;
+
     void StartEnterText();
     void EndEnterText();
     void EnterText(const sf::Event::TextEntered* input);
@@ -31,4 +35,5 @@ protected:
 public:
     Utils::EventCallback<void, std::string> OnValidateText;
     std::string GetText();
+    void SetMaxCharacter(int value);
 };

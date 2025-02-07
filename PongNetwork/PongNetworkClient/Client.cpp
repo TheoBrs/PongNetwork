@@ -115,6 +115,7 @@ void Client::Connection(std::string ip, int port, std::string name)
 
 void Client::SendOnChangeInput(float input)
 {
+	std::cout << m_clientId << std::endl;
 	std::string messageToSend = "InputChange " + std::to_string(m_clientId) + " " + std::to_string(input);
 	m_udpClient->AddMessageToSend(messageToSend);
 }

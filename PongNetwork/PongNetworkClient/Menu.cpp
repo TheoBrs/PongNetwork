@@ -58,6 +58,8 @@ void Menu::Init(sf::Font* font)
 	SetErrorText("Error Text");
 
 	m_validationButton->OnClickEvent += [this]() {OnValidate(); };
+	m_nameField->SetMaxCharacter(10);
+
 }
 
 void Menu::SetErrorText(const std::string& text)

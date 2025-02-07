@@ -40,7 +40,7 @@ void TextField::EnterText(const sf::Event::TextEntered* input)
     {
         str = str.substr(0, str.length() - 1);
     }
-    else if (input->unicode != U'\b')
+    else if (input->unicode != U'\b' && str.size() < m_maxCharacter)
     {
         str +=  input->unicode;
     }
@@ -115,4 +115,9 @@ void TextField::draw(sf::RenderTarget& target, sf::RenderStates states) const
 std::string TextField::GetText()
 {
     return m_textField->getString();
+}
+
+void TextField::SetMaxCharacter(int value)
+{
+    m_maxCharacter = value;
 }
